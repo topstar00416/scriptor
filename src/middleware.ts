@@ -62,13 +62,6 @@ export async function middleware(request: NextRequest) {
 
     const isPublicPath = PUBLIC_PATHS.some(path => request.nextUrl.pathname.startsWith(path))
 
-    // Redirect authenticated users away from auth pages
-    if (session && isPublicPath && !request.nextUrl.pathname.startsWith('/auth/callback')) {
-      return NextResponse.redirect(new URL('/home', request.url))
-    }
-
-    // Redirect unauthenticated users trying to access protected routes
-
     if (!session && !isPublicPath) {
       // Store the attempted URL for redirect after login
       const loginUrl = new URL('/login', request.url)
