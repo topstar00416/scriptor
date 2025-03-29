@@ -113,28 +113,8 @@ const UserDropdown = () => {
                     <CustomAvatar size={40} alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography variant='h6'>John Doe</Typography>
-                      <Typography variant='body2' color='text.disabled'>
-                        admin@sneat.com
-                      </Typography>
                     </div>
                   </div>
-                  <Divider className='mlb-1' />
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='bx-user' />
-                    <Typography color='text.primary'>My Profile</Typography>
-                  </MenuItem>
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='bx-cog' />
-                    <Typography color='text.primary'>Settings</Typography>
-                  </MenuItem>
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='bx-dollar' />
-                    <Typography color='text.primary'>Pricing</Typography>
-                  </MenuItem>
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='bx-help-circle' />
-                    <Typography color='text.primary'>FAQ</Typography>
-                  </MenuItem>
                   <Divider className='mlb-1' />
                   <MenuItem className='gap-3' onClick={handleUserLogout}>
                     <i className='bx-power-off' />
