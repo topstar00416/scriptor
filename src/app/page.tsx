@@ -47,7 +47,7 @@ export default function page() {
               Screen writing, story development, and production tools for film & TV, and interactive media.
             </p>
             <Link
-              href='/get-started'
+              href='/register'
               className='mt-8 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full px-8 py-3 transition-colors'
             >
               Get Started
