@@ -90,17 +90,17 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
     e.preventDefault()
 
     const willCreate = await swal({
-      title: 'Create Project?',
-      text: 'Are you sure you want to create this project?',
+      title: mode === 'edit' ? 'Update Project?' : 'Create Project',
+      text: `Are you sure you want to ${mode === 'edit' ? 'update' : 'create'} this project?`,
       icon: 'warning',
-      buttons: ['Cancel', 'Yes, create it!'],
+      buttons: ['Cancel', 'Yes'],
       dangerMode: true
     })
 
     if (willCreate) {
       try {
         swal({
-          title: mode === 'create' ? 'Creating project...' : 'Updating project...',
+          title: mode === 'edit' ? 'Updating project...' : 'Creating project...',
           text: 'Please wait...',
           icon: 'info',
           closeOnClickOutside: false

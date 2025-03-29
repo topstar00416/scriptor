@@ -117,17 +117,7 @@ const ImageUpload = ({ onImageSelect, previewUrl, isReadOnly }: ProductImageProp
   return (
     <Dropzone>
       <Card>
-        <CardHeader
-          title='Product Image'
-          action={
-            !isReadOnly && (
-              <Link href='#' className='text-primary font-medium'>
-                Add media from URL
-              </Link>
-            )
-          }
-          sx={{ '& .MuiCardHeader-action': { alignSelf: 'center' } }}
-        />
+        <CardHeader title='Product Image' />
         <CardContent>
           {!isReadOnly ? (
             <div {...getRootProps({ className: 'dropzone' })}>
