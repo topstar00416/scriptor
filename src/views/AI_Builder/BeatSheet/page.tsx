@@ -25,7 +25,7 @@ import { createClient } from '@configs/supabase'
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 
-const ProjectManager = () => {
+const ProjectManager = (props: { beatSheet: string[] }) => {
   const router = useRouter()
   const supabase = createClient()
 
@@ -72,9 +72,7 @@ const ProjectManager = () => {
                 rows={4}
                 label='Beat Sheet'
                 name='beat_sheet'
-                // value={data.beat_sheet}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
+                value={props.beatSheet}
               />
             </Grid>
           </Grid>

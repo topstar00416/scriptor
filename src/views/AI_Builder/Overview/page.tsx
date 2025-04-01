@@ -26,28 +26,22 @@ import { createClient } from '@configs/supabase'
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 
-interface ProjectManagerProps {
-  mode: 'create' | 'edit' | 'show'
-  projectId?: string
-}
-
-const ProjectManager = () => {
+const ProjectManager = (props: { logline: string }) => {
   const router = useRouter()
-  const params = useParams()
   const supabase = createClient()
-  const [data, setData] = useState({
+  const params = useParams()
+
+  const projectId = params.id as string
+
+  const [projectData, setProjectData] = useState({
     title: '',
     genre: '',
     tone: '',
-    concept: '',
-    logline: ''
+    concept: ''
   })
 
   useEffect(() => {
     const fetchProject = async () => {
-      const projectId = params.id as string
-      if (!projectId) return
-
       const { data: projectData, error } = await supabase
         .from('Project')
         .select('*')
@@ -56,25 +50,14 @@ const ProjectManager = () => {
 
       if (error) {
         console.error('Error fetching project:', error)
-        await swal({
-          title: 'Error!',
-          text: 'Failed to fetch project data',
-          icon: 'error'
-        })
-      } else if (projectData) {
-        setData(projectData)
+      } else {
+        setProjectData(projectData)
       }
     }
 
     fetchProject()
-  }, [params.id, supabase])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setData({
-      ...data,
-      [e.target.name]: e.target.value
-    })
-  }
+  }, [projectId, supabase])
+  
 
   return (
     <Card className='w-full h-full'>
@@ -94,8 +77,7 @@ const ProjectManager = () => {
                 fullWidth
                 label='Title'
                 name='title'
-                value={data.title}
-                onChange={handleChange}
+                value={projectData.title}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -104,8 +86,7 @@ const ProjectManager = () => {
                 select
                 label='Genre'
                 name='genre'
-                value={data.genre}
-                onChange={handleChange}
+                value={projectData.genre}
               >
                 {genres.map(genre => (
                   <MenuItem key={genre} value={genre}>
@@ -120,8 +101,7 @@ const ProjectManager = () => {
                 select
                 label='Tone'
                 name='tone'
-                value={data.tone}
-                onChange={handleChange}
+                value={projectData.tone}
               >
                 {tones.map(tone => (
                   <MenuItem key={tone} value={tone}>
@@ -139,8 +119,7 @@ const ProjectManager = () => {
                 rows={4}
                 label='Concept'
                 name='concept'
-                value={data.concept}
-                onChange={handleChange}
+                value={projectData.concept}
               />
             </Grid>
           </Grid>
@@ -177,8 +156,7 @@ const ProjectManager = () => {
                 rows={4}
                 label='Logline'
                 name='logline'
-                value={data.logline}
-                onChange={handleChange}
+                value={props.logline}
               />
             </Grid>
           </Grid>
