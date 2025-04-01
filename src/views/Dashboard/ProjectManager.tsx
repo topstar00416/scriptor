@@ -135,8 +135,9 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             text: 'Project updated successfully',
             icon: 'success'
           })
+          router.push('/home')
         } else if (mode === 'create') {
-          const { error } = await supabase.from('Project').insert(submitData)
+          const { data: newProject, error } = await supabase.from('Project').insert(submitData).select().single()
 
           if (error) throw error
 
@@ -145,9 +146,8 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             text: 'Project created successfully',
             icon: 'success'
           })
+          router.push(`/home/builder/${newProject.id}`)
         }
-
-        router.push('/home')
       } catch (error) {
         console.error('Error:', error)
         await swal({

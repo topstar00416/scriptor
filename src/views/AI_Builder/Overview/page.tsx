@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 // External Imports
 import swal from 'sweetalert'
@@ -32,11 +33,48 @@ interface ProjectManagerProps {
 
 const ProjectManager = () => {
   const router = useRouter()
+  const params = useParams()
   const supabase = createClient()
-
+  const [data, setData] = useState({
+    title: '',
+    genre: '',
+    tone: '',
+    concept: '',
+    logline: ''
+  })
 
   useEffect(() => {
-  }, [])
+    const fetchProject = async () => {
+      const projectId = params.id as string
+      if (!projectId) return
+
+      const { data: projectData, error } = await supabase
+        .from('Project')
+        .select('*')
+        .eq('id', projectId)
+        .single()
+
+      if (error) {
+        console.error('Error fetching project:', error)
+        await swal({
+          title: 'Error!',
+          text: 'Failed to fetch project data',
+          icon: 'error'
+        })
+      } else if (projectData) {
+        setData(projectData)
+      }
+    }
+
+    fetchProject()
+  }, [params.id, supabase])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setData({
+      ...data,
+      [e.target.name]: e.target.value
+    })
+  }
 
   return (
     <Card className='w-full h-full'>
@@ -56,9 +94,8 @@ const ProjectManager = () => {
                 fullWidth
                 label='Title'
                 name='title'
-                // value={data.title}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
+                value={data.title}
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -67,9 +104,8 @@ const ProjectManager = () => {
                 select
                 label='Genre'
                 name='genre'
-                // value={data.genre}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
+                value={data.genre}
+                onChange={handleChange}
               >
                 {genres.map(genre => (
                   <MenuItem key={genre} value={genre}>
@@ -84,9 +120,8 @@ const ProjectManager = () => {
                 select
                 label='Tone'
                 name='tone'
-                // value={data.tone}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
+                value={data.tone}
+                onChange={handleChange}
               >
                 {tones.map(tone => (
                   <MenuItem key={tone} value={tone}>
@@ -104,9 +139,8 @@ const ProjectManager = () => {
                 rows={4}
                 label='Concept'
                 name='concept'
-                // value={data.concept}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
+                value={data.concept}
+                onChange={handleChange}
               />
             </Grid>
           </Grid>
@@ -143,9 +177,8 @@ const ProjectManager = () => {
                 rows={4}
                 label='Logline'
                 name='logline'
-                // value={data.logline}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
+                value={data.logline}
+                onChange={handleChange}
               />
             </Grid>
           </Grid>
