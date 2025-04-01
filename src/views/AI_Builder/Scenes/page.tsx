@@ -65,16 +65,20 @@ const ProjectManager = (props: { scenes: string[] }) => {
           </div>
           <Divider flexItem className='mt-4 mb-4' />
           <Grid container spacing={2} className='mt-4'>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label='Scenes'
-                name='scenes'
-                value={props.scenes}
-              />
-            </Grid>
+            {
+              props.scenes.map((scene, index) => (
+                <Grid item xs={12} key={index}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    label={`Scene ${index + 1}`}
+                    name={`scene_${index + 1}`}
+                    value={scene}
+                  />
+                </Grid>
+              ))
+            }
           </Grid>
         </form>
       </CardContent>

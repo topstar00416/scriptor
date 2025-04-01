@@ -22,6 +22,7 @@ import Divider from '@mui/material/Divider'
 // Internal Imports
 import { createClient } from '@configs/supabase'
 import ImageUpload from './ImageUpload'
+import GenerateInfo from './Generate_info'
 
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
@@ -29,6 +30,12 @@ const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 interface ProjectManagerProps {
   mode: 'create' | 'edit' | 'show'
   projectId?: string
+}
+
+interface GeneratedContent {
+  logline: string
+  beatSheet: string[]
+  scenes: string[]
 }
 
 const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
@@ -41,6 +48,12 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
     tone: '',
     concept: '',
     imageUrl: ''
+  })
+
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent>({
+    logline: '',
+    beatSheet: [],
+    scenes: []
   })
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -146,6 +159,34 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             text: 'Project created successfully',
             icon: 'success'
           })
+
+          GenerateInfo(submitData, setGeneratedContent)
+
+          generatedContent.beatSheet.map(async (item) => {
+            const { data: newBeatSheet, error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
+              projectId: newProject.id,
+              beatSheet: item
+            })
+
+            if (newBeatSheetError) throw newBeatSheetError
+          })
+
+          generatedContent.scenes.map(async (item) => {
+            const { data: newScene, error: newSceneError } = await supabase.from('Scene').insert({
+              projectId: newProject.id,
+              scene: item
+            })
+
+            if (newSceneError) throw newSceneError
+          })
+
+          const { data: loglinedata, error: loglineError } = await supabase.from('Logline').insert({
+            projectId: newProject.id,
+            logline: generatedContent.logline
+          })
+
+          if (loglineError) throw loglineError
+
           router.push(`/home/builder/${newProject.id}`)
         }
       } catch (error) {

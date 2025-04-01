@@ -65,16 +65,20 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
           </div>
           <Divider flexItem className='mt-4 mb-4' />
           <Grid container spacing={2} className='mt-4'>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label='Beat Sheet'
-                name='beat_sheet'
-                value={props.beatSheet}
-              />
-            </Grid>
+            {
+              props.beatSheet.map((beat, index) => (
+                <Grid item xs={12} key={index}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    label={`Beat ${index + 1}`}
+                    name={`beat_${index + 1}`}
+                    value={beat}
+                  />
+                </Grid>
+              ))
+            }
           </Grid>
         </form>
       </CardContent>
