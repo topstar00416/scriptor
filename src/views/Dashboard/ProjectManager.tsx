@@ -18,6 +18,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
@@ -58,6 +59,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (projectId) {
@@ -112,6 +114,8 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
     if (willCreate) {
       try {
+        setIsLoading(true)
+
         swal({
           title: mode === 'edit' ? 'Updating project...' : 'Creating project...',
           text: 'Please wait...',
@@ -199,103 +203,112 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
           text: mode === 'edit' ? 'Error updating project' : 'Error creating project',
           icon: 'error'
         })
+      } finally {
+        setIsLoading(false)
       }
     }
   }
 
   return (
-    <Card className='w-full h-full'>
-      <CardContent className='flex flex-col gap-6 h-full'>
-        <form onSubmit={handleSubmit}>
-          <div className='flex flex-wrap items-center justify-between gap-4'>
-            <div>
-              <Typography variant='h3'>
-                {mode === 'edit' ? 'Edit Project' : mode === 'create' ? 'Create Project' : data.title}
-              </Typography>
+    <div className='relative w-full h-full'>
+      {isLoading && (
+        <div className='fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50'>
+          <CircularProgress />
+        </div>
+      )}
+      <Card className='w-full h-full'>
+        <CardContent className='flex flex-col gap-6 h-full'>
+          <form onSubmit={handleSubmit}>
+            <div className='flex flex-wrap items-center justify-between gap-4'>
+              <div>
+                <Typography variant='h3'>
+                  {mode === 'edit' ? 'Edit Project' : mode === 'create' ? 'Create Project' : data.title}
+                </Typography>
+              </div>
             </div>
-          </div>
-          <Divider />
-          <Grid container spacing={2} className='mt-4'>
-            <Grid item xs={12} md={7}>
-              <ImageUpload onImageSelect={handleImageSelect} previewUrl={previewUrl} isReadOnly={isReadOnly} />
+            <Divider />
+            <Grid container spacing={2} className='mt-4'>
+              <Grid item xs={12} md={7}>
+                <ImageUpload onImageSelect={handleImageSelect} previewUrl={previewUrl} isReadOnly={isReadOnly} />
+              </Grid>
+              <Divider orientation='vertical' flexItem className='pl-3' />
+              <Grid item xs={12} md={4.88} className='pl-3 space-y-5'>
+                <TextField
+                  fullWidth
+                  label='Title'
+                  name='title'
+                  value={data.title}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                />
+                <TextField
+                  fullWidth
+                  select
+                  label='Genre'
+                  name='genre'
+                  value={data.genre}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                >
+                  {genres.map(genre => (
+                    <MenuItem key={genre} value={genre}>
+                      {genre}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  fullWidth
+                  select
+                  label='Tone'
+                  name='tone'
+                  value={data.tone}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                >
+                  {tones.map(tone => (
+                    <MenuItem key={tone} value={tone}>
+                      {tone}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label='Concept'
+                  name='concept'
+                  value={data.concept}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                />
+              </Grid>
             </Grid>
-            <Divider orientation='vertical' flexItem className='pl-3' />
-            <Grid item xs={12} md={4.88} className='pl-3 space-y-5'>
-              <TextField
-                fullWidth
-                label='Title'
-                name='title'
-                value={data.title}
-                onChange={handleChange}
-                disabled={isReadOnly}
-              />
-              <TextField
-                fullWidth
-                select
-                label='Genre'
-                name='genre'
-                value={data.genre}
-                onChange={handleChange}
-                disabled={isReadOnly}
-              >
-                {genres.map(genre => (
-                  <MenuItem key={genre} value={genre}>
-                    {genre}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                fullWidth
-                select
-                label='Tone'
-                name='tone'
-                value={data.tone}
-                onChange={handleChange}
-                disabled={isReadOnly}
-              >
-                {tones.map(tone => (
-                  <MenuItem key={tone} value={tone}>
-                    {tone}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label='Concept'
-                name='concept'
-                value={data.concept}
-                onChange={handleChange}
-                disabled={isReadOnly}
-              />
-            </Grid>
-          </Grid>
-          <Divider flexItem className='mt-4 mb-4' />
-          <div className='flex justify-end'>
-            {mode !== 'show' && (
+            <Divider flexItem className='mt-4 mb-4' />
+            <div className='flex justify-end'>
+              {mode !== 'show' && (
+                <Button
+                  type='submit'
+                  variant='tonal'
+                  color='primary'
+                  startIcon={mode === 'edit' ? <i className='bx-edit-alt' /> : <i className='bx-plus' />}
+                >
+                  {mode === 'edit' ? 'Update' : 'Create'}
+                </Button>
+              )}
               <Button
-                type='submit'
                 variant='tonal'
-                color='primary'
-                startIcon={mode === 'edit' ? <i className='bx-edit-alt' /> : <i className='bx-plus' />}
+                color='error'
+                startIcon={<i className='bx-arrow-back' />}
+                onClick={() => router.push('/home')}
+                className='ml-2'
               >
-                {mode === 'edit' ? 'Update' : 'Create'}
+                Back
               </Button>
-            )}
-            <Button
-              variant='tonal'
-              color='error'
-              startIcon={<i className='bx-arrow-back' />}
-              onClick={() => router.push('/home')}
-              className='ml-2'
-            >
-              Back
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
