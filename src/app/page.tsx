@@ -13,12 +13,12 @@ export default function page() {
             <Logo />
           </div>
           <div className='flex items-center space-x-6'>
-            <Link href='/login' className='text-white hover:text-gray-300 transition-colors text-sm font-medium'>
+            <Link href='/login' className='text-white hover:text-gray-300 transition-colors text-sm font-light tracking-wide'>
               Login
             </Link>
             <Link
               href='/register'
-              className='bg-transparent hover:bg-white/20 text-white border border-white/80 rounded-full px-7 py-2.5 transition-all text-sm font-medium'
+              className='bg-transparent hover:bg-white/20 text-white border border-white/80 rounded-full px-7 py-2.5 transition-all text-sm font-light tracking-wide'
             >
               Sign Up
             </Link>
@@ -32,7 +32,7 @@ export default function page() {
           <div className='absolute inset-0 z-0'>
             <Image
               src='https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=2070&auto=format&fit=crop'
-              alt='Writing desk with laptop and coffee'
+              alt='Vintage typewriter on wooden desk with creative writing setup'
               fill
               priority
               className='object-cover'
@@ -40,18 +40,37 @@ export default function page() {
           </div>
 
           <div className='relative z-20 container mx-auto px-4 h-full flex flex-col items-center justify-center text-center'>
-            <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold text-white max-w-5xl mx-auto leading-tight'>
+            <h1 className='text-4xl md:text-5xl lg:text-6xl font-extrabold text-white max-w-5xl mx-auto leading-tight tracking-tight'>
               Turn your creative vision into a professional screenplay
             </h1>
-            <p className='text-white/90 mt-6 text-lg md:text-xl max-w-3xl'>
+            <p className='text-white/90 mt-6 text-lg md:text-xl max-w-3xl font-light tracking-wide leading-relaxed'>
               Screen writing, story development, and production tools for film & TV, and interactive media.
             </p>
             <Link
               href='/register'
-              className='mt-8 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full px-8 py-3 transition-colors'
+              className='mt-8 bg-blue-500 hover:bg-blue-600 text-white font-medium tracking-wide rounded-full px-8 py-3 transition-colors'
             >
               Get Started
             </Link>
+          </div>
+        </section>
+
+        <section className='py-16 bg-white'>
+          <div className='container mx-auto px-4'>
+            <div className='flex justify-center space-x-8'>
+              <button className='text-gray-600 hover:text-blue-600 font-medium text-lg transition-colors'>
+                Overview
+              </button>
+              <button className='text-gray-600 hover:text-blue-600 font-medium text-lg transition-colors'>
+                Beat Sheet
+              </button>
+              <button className='text-gray-600 hover:text-blue-600 font-medium text-lg transition-colors'>
+                Scenes
+              </button>
+              <button className='text-gray-600 hover:text-blue-600 font-medium text-lg transition-colors'>
+                Rewrite Tool
+              </button>
+            </div>
           </div>
         </section>
       </main>
