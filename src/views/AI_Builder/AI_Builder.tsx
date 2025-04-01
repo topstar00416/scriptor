@@ -20,10 +20,6 @@ import Scenes from './Scenes/page'
 import Rewrite from './Rewrite/page'
 
 interface ProjectData {
-  title: string
-  tone: string
-  genre: string
-  concept: string
   beatSheet: any[] // from BeatSheet table
   scenes: any[] // from Scene table
   logline: string // from Logline table
@@ -31,14 +27,14 @@ interface ProjectData {
 
 interface BeatSheetData {
   id: string
-  projectId: string
-  beatSheet: string
+  project_id: string
+  description: string
 }
 
 interface SceneData {
   id: string
-  projectId: string
-  scene: string
+  project_id: string
+  description: string
 }
 
 interface LoglineData {
@@ -54,10 +50,6 @@ const AccountSettings = () => {
   const projectId = params.id as string
 
   const [projectData, setProjectData] = useState<ProjectData>({
-    title: '',
-    tone: '',
-    genre: '',
-    concept: '',
     beatSheet: [],
     scenes: [],
     logline: ''
@@ -65,52 +57,35 @@ const AccountSettings = () => {
 
   // States
   const [activeTab, setActiveTab] = useState('overview')
-  const [tabContentList, setTabContentList] = useState({
-    overview: <Overview logline={projectData.logline}/>,
-    beat_sheet: <BeatSheet beatSheet={projectData.beatSheet}/>,
-    scenes: <Scenes scenes={projectData.scenes}/>,
-    rewrite: <Rewrite />,
-  })
 
   useEffect(() => {
     const fetchProject = async () => {
-      const { data: projectData, error } = await supabase
+      const { data, error } = await supabase
         .from('Project')
-        .select('*')
+        .select(`
+          *,
+          BeatSheet (*),
+          Scene (*),
+          Logline (*)
+        `)
         .eq('id', projectId)
-        .single()
-
-      const { data: beatSheetData, error: beatSheetError } = await supabase
-        .from('BeatSheet')
-        .select('*')
-        .eq('projectId', projectId)
-
-      const { data: sceneData, error: sceneError } = await supabase
-        .from('Scene')
-        .select('*')
-        .eq('projectId', projectId)
-      
-      const { data: loglineData, error: loglineError } = await supabase
-        .from('Logline')
-        .select('*')
-        .eq('projectId', projectId)
         .single()
 
       if (error) {
         console.error('Error fetching project:', error)
       } else {
         setProjectData({
-          ...projectData,
-          beatSheet: beatSheetData?.map(item => item.beatSheet) || [],
-          scenes: sceneData?.map(item => item.scene) || [],
-          logline: loglineData?.logline || ''
+          beatSheet: data?.BeatSheet.map((item: BeatSheetData) => item.description)  || [],
+          scenes: data?.Scene.map((item: SceneData) => item.description) || [],
+          logline: data?.Logline[0].description || ''
         })
       }
     }
 
     fetchProject()
   }, [projectId, supabase])
-  
+
+  // Functions
   const handleChange = (event: SyntheticEvent, value: string) => {
     setActiveTab(value)
   }
@@ -128,7 +103,10 @@ const AccountSettings = () => {
         </Grid>
         <Grid item xs={12}>
           <TabPanel value={activeTab} className='p-0'>
-            {tabContentList[activeTab as keyof typeof tabContentList]}
+            {activeTab === 'overview' && <Overview logline={projectData.logline} beatSheet={projectData.beatSheet}/>}
+            {activeTab === 'beat_sheet' && <BeatSheet beatSheet={projectData.beatSheet}/>}
+            {activeTab === 'scenes' && <Scenes scenes={projectData.scenes}/>}
+            {activeTab === 'rewrite' && <Rewrite />}
           </TabPanel>
         </Grid>
       </Grid>

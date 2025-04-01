@@ -160,29 +160,32 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             icon: 'success'
           })
 
-          GenerateInfo(submitData, setGeneratedContent)
+          const generatedContent = await GenerateInfo(submitData)
 
-          generatedContent.beatSheet.map(async (item) => {
-            const { data: newBeatSheet, error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
-              projectId: newProject.id,
-              beatSheet: item
+          console.log(generatedContent)
+
+          setGeneratedContent(generatedContent)
+
+          await Promise.all([
+            ...generatedContent.beatSheet.map(async item => {
+              const { error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
+                project_id: newProject.id,
+                description: item
+              })
+              if (newBeatSheetError) throw newBeatSheetError
+            }),
+            ...generatedContent.scenes.map(async item => {
+              const { error: newSceneError } = await supabase.from('Scene').insert({
+                project_id: newProject.id,
+                description: item
+              })
+              if (newSceneError) throw newSceneError
             })
+          ])
 
-            if (newBeatSheetError) throw newBeatSheetError
-          })
-
-          generatedContent.scenes.map(async (item) => {
-            const { data: newScene, error: newSceneError } = await supabase.from('Scene').insert({
-              projectId: newProject.id,
-              scene: item
-            })
-
-            if (newSceneError) throw newSceneError
-          })
-
-          const { data: loglinedata, error: loglineError } = await supabase.from('Logline').insert({
-            projectId: newProject.id,
-            logline: generatedContent.logline
+          const { error: loglineError } = await supabase.from('Logline').insert({
+            project_id: newProject.id,
+            description: generatedContent.logline
           })
 
           if (loglineError) throw loglineError

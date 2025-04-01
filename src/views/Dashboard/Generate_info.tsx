@@ -17,15 +17,11 @@ interface GeneratedContent {
   scenes: string[]
 }
 
-const GenerateInfo = (projectData: ProjectData, setGeneratedContent: (content: GeneratedContent) => void) => {
-  const [openai, setOpenai] = useState<OpenAI | null>(null)
-
-  useEffect(() => {
-    setOpenai(new OpenAI({
-      apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-      dangerouslyAllowBrowser: true
-    }))
-  }, [])
+const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent> => {
+  const openai = new OpenAI({
+    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
+  })
 
   const systemPrompt = `
     Create a detailed logline, beat sheets, and scene outlines based on the provided title, tone, genre, and concept of a film script. Use each element to inform the structure and content of the outlines, ensuring that the logline succinctly captures the essence of the film, while the beat sheets outline the major plot points and the scenes provide detailed descriptions of specific moments in the story. 
@@ -76,9 +72,7 @@ const GenerateInfo = (projectData: ProjectData, setGeneratedContent: (content: G
     - Focus on creating engaging and creative content that can be utilized for further film script development.
   `
 
-  const generateBeatSheet = async () => {
-    if (!openai) return
-
+  try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -88,7 +82,7 @@ const GenerateInfo = (projectData: ProjectData, setGeneratedContent: (content: G
     })
 
     const content = response.choices[0]?.message?.content || ''
-    
+
     // Extract logline
     const loglineMatch = content.match(/Logline: (.*?)(?=\n|$)/)
     const logline = loglineMatch ? loglineMatch[1].trim() : ''
@@ -99,26 +93,31 @@ const GenerateInfo = (projectData: ProjectData, setGeneratedContent: (content: G
       ? beatSheetMatch[1]
           .split('\n')
           .filter(line => line.trim().match(/^\d+\./))
-          .map(line => line.replace(/^\d+\.\s*/, '').trim())
+          .map(line => line.trim())
       : []
 
     // Extract scenes
-    const scenesMatch = content.match(/Scene Outlines:([\s\S]*?)$/)
+    const scenesMatch = content.match(/Scene Outlines:([\s\S]*)$/)
     const scenes = scenesMatch
       ? scenesMatch[1]
           .split('\n')
-          .filter(line => line.trim().startsWith('- Scene'))
-          .map(line => line.replace(/^-\s*Scene \d+:\s*/, '').trim())
+          .filter(line => line.trim().startsWith('Scene'))
+          .map(line => line.replace(/^Scene \d+: /, '').trim())
       : []
 
-    setGeneratedContent({
+    return {
       logline,
       beatSheet,
       scenes
-    })
+    }
+  } catch (error) {
+    console.error('Error generating content:', error)
+    return {
+      logline: '',
+      beatSheet: [],
+      scenes: []
+    }
   }
-
-  generateBeatSheet();
 }
 
-export default GenerateInfo
+export default generateInfo

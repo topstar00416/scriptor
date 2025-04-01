@@ -26,7 +26,7 @@ import { createClient } from '@configs/supabase'
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 
-const ProjectManager = (props: { logline: string }) => {
+const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
   const router = useRouter()
   const supabase = createClient()
   const params = useParams()

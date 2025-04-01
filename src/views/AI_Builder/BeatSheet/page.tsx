@@ -22,16 +22,9 @@ import Divider from '@mui/material/Divider'
 // Internal Imports
 import { createClient } from '@configs/supabase'
 
-const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
-const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
-
 const ProjectManager = (props: { beatSheet: string[] }) => {
   const router = useRouter()
-  const supabase = createClient()
-
-
-  useEffect(() => {
-  }, [])
+  console.log(props)
 
   return (
     <Card className='w-full h-full'>
