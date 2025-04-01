@@ -43,38 +43,36 @@ const ProjectManager = () => {
                 Beat Sheet
               </Typography>
             </div>
-          </div>
-          <Divider flexItem className='mt-4 mb-4' />
-          <div className='flex items-center justify-between'>
             <div className='flex'>
-            <Button
-                type='submit'
-                variant='tonal'
-                color='primary'
-                startIcon={<i className='bx-magic-2' />}
-            >
-                Regenerate
-            </Button>
-              <Button
-                variant='tonal'
-                color='error'
-                startIcon={<i className='bx-arrow-back' />}
-                onClick={() => router.push('/home')}
-                className='ml-2'
-              >
-                Back
-              </Button>
+                <Button
+                    type='submit'
+                    variant='tonal'
+                    color='primary'
+                    startIcon={<i className='bx-magic-2' />}
+                >
+                    Regenerate
+                </Button>
+                <Button
+                    variant='tonal'
+                    color='error'
+                    startIcon={<i className='bx-arrow-back' />}
+                    onClick={() => router.push('/home')}
+                    className='ml-2'
+                >
+                    Back
+                </Button>
             </div>
           </div>
+          <Divider flexItem className='mt-4 mb-4' />
           <Grid container spacing={2} className='mt-4'>
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 multiline
                 rows={4}
-                label='Logline'
-                name='logline'
-                // value={data.logline}
+                label='Beat Sheet'
+                name='beat_sheet'
+                // value={data.beat_sheet}
                 // onChange={handleChange}
                 // disabled={isReadOnly}
               />

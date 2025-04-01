@@ -111,16 +111,14 @@ const ProjectManager = () => {
             </Grid>
           </Grid>
           <Divider flexItem className='mt-4 mb-4' />
-          <div className='flex items-center justify-between'>
-            <Typography variant='h3'>Logline</Typography>
-            <div className='flex'>
+          <div className='flex items-center justify-end'>
               <Button
                 type='submit'
                 variant='tonal'
                 color='primary'
                 startIcon={<i className='bx-magic-2' />}
               >
-                Regenerate
+                Rewrite Scene
               </Button>
               <Button
                 variant='tonal'
@@ -131,22 +129,7 @@ const ProjectManager = () => {
               >
                 Back
               </Button>
-            </div>
           </div>
-          <Grid container spacing={2} className='mt-4'>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label='Logline'
-                name='logline'
-                // value={data.logline}
-                // onChange={handleChange}
-                // disabled={isReadOnly}
-              />
-            </Grid>
-          </Grid>
         </form>
       </CardContent>
     </Card>
