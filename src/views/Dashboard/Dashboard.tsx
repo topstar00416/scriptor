@@ -34,10 +34,26 @@ const Dashboard = () => {
   const [projects, setProjects] = useState<any[]>([])
   const [rerender, setRerender] = useState(false)
   const [activePage, setActivePage] = useState(0)
+  const [totalProjects, setTotalProjects] = useState(0)
+  const projectsPerPage = 6
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const { data, error } = await supabase.from('Project').select('*')
+      // Get total count
+      const { count } = await supabase
+        .from('Project')
+        .select('*', { count: 'exact', head: true })
+      
+      if (count !== null) {
+        setTotalProjects(count)
+      }
+
+      // Get paginated data
+      const { data, error } = await supabase
+        .from('Project')
+        .select('*')
+        .range(activePage * projectsPerPage, (activePage + 1) * projectsPerPage - 1)
+        .order('created_at', { ascending: false })
 
       if (error) {
         console.error('Error fetching projects:', error)
@@ -95,7 +111,7 @@ const Dashboard = () => {
         <div className='flex flex-wrap items-center justify-between gap-4'>
           <div>
             <Typography variant='h3'>Projects</Typography>
-            <Typography>Total {projects.length} projects you have created</Typography>
+            <Typography>Total {totalProjects} projects you have created</Typography>
           </div>
           <div>
             <Button
@@ -204,7 +220,7 @@ const Dashboard = () => {
         </Grid>
         <div className='flex justify-center'>
           <Pagination
-            count={Math.ceil(projects.length / 6)}
+            count={Math.ceil(totalProjects / projectsPerPage)}
             page={activePage + 1}
             showFirstButton
             showLastButton
