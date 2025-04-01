@@ -14,7 +14,6 @@ import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
-import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
@@ -24,7 +23,13 @@ import { createClient } from '@configs/supabase'
 
 const ProjectManager = (props: { beatSheet: string[] }) => {
   const router = useRouter()
-  console.log(props)
+
+  // Sort the beatSheet array
+  const sortedBeatSheet = [...props.beatSheet].sort((a, b) => {
+    const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10)
+    const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10)
+    return numA - numB
+  })
 
   return (
     <Card className='w-full h-full'>
@@ -59,7 +64,7 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
           <Divider flexItem className='mt-4 mb-4' />
           <Grid container spacing={2} className='mt-4'>
             {
-              props.beatSheet.map((beat, index) => (
+              sortedBeatSheet.map((beat, index) => (
                 <Grid item xs={12} key={index}>
                   <TextField
                     fullWidth
