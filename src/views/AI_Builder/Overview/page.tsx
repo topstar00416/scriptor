@@ -77,7 +77,7 @@ const ProjectManager = () => {
   }, [projectId, supabase])
   
 
-  const handleLoglineChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLoglineChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setLogline(event.target.value)
   }
 
@@ -104,7 +104,7 @@ const ProjectManager = () => {
     }
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const { error } = await supabase
@@ -123,7 +123,7 @@ const ProjectManager = () => {
   return (
     <Card className='w-full h-full'>
       <CardContent className='flex flex-col gap-6 h-full'>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleEdit}>
           <div className='flex flex-wrap items-center justify-between gap-4'>
             <div>
               <Typography variant='h3'>

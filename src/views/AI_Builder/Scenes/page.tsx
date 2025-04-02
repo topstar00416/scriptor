@@ -97,7 +97,7 @@ const ProjectManager = () => {
               project_id: projectId,
               description: scene
             })
-            
+
           if (insertError) throw insertError
         })
       )
@@ -112,11 +112,27 @@ const ProjectManager = () => {
     }
   }
 
+  const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const { error } = await supabase
+      .from('Scene')
+      .update({ description: scenes })
+      .eq('project_id', projectId)
+
+    if (error) {
+      console.error('Error updating scenes:', error)
+      swal('Error', 'Failed to update scenes', 'error')
+    } else {
+      swal('Success', 'Scenes updated successfully', 'success')
+    }
+  }
+
   return (
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
         <CardContent className='flex flex-col gap-6 h-full'>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleEdit}>
             <div className='flex flex-wrap items-center justify-between gap-4'>
               <div>
                 <Typography variant='h3'>
@@ -134,7 +150,7 @@ const ProjectManager = () => {
                   Regenerate
                 </Button>
                 <Button
-                  type='button'
+                  type='submit'
                   variant='tonal'
                   color='primary'
                   startIcon={<i className='bx-magic-2' />}

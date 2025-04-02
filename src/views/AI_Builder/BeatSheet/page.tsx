@@ -112,11 +112,27 @@ const ProjectManager = () => {
     }
   }
 
+  const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const { error } = await supabase
+      .from('BeatSheet')
+      .update({ description: beatSheet })
+      .eq('project_id', projectId)
+
+    if (error) {
+      console.error('Error updating beat sheet:', error)
+      swal('Error', 'Failed to update beat sheet', 'error')
+    } else {
+      swal('Success', 'Beat sheet updated successfully', 'success')
+    }
+  }
+
   // Sort the beatSheet array
   const sortedBeatSheet = [...beatSheet].sort((a, b) => {
     const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10)
     const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10)
-    
+
     return numA - numB
   })
 
@@ -124,7 +140,7 @@ const ProjectManager = () => {
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
         <CardContent className='flex flex-col gap-6 h-full'>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleEdit}>
             <div className='flex flex-wrap items-center justify-between gap-4'>
               <div>
                 <Typography variant='h3'>
@@ -136,13 +152,14 @@ const ProjectManager = () => {
                   onClick={handleRegenerate}
                   variant='tonal'
                   color='primary'
+                  type='button'
                   startIcon={<i className='bx-magic-2' />}
                   disabled={isLoading}
                 >
                   Regenerate
                 </Button>
                 <Button
-                  type='button'
+                  type='submit'
                   variant='tonal'
                   color='primary'
                   startIcon={<i className='bx-magic-2' />}
@@ -179,11 +196,6 @@ const ProjectManager = () => {
                       name={`beat_${index + 1}`}
                       value={beat}
                       disabled={isLoading}
-                      InputProps={{
-                        endAdornment: isLoading && (
-                          <CircularProgress size={20} />
-                        )
-                      }}
                     />
                   </Grid>
                 ))}
