@@ -103,7 +103,7 @@ const AccountSettings = () => {
         </Grid>
         <Grid item xs={12}>
           <TabPanel value={activeTab} className='p-0'>
-            {activeTab === 'overview' && <Overview logline={projectData.logline} beatSheet={projectData.beatSheet}/>}
+            {activeTab === 'overview' && <Overview />}
             {activeTab === 'beat_sheet' && <BeatSheet beatSheet={projectData.beatSheet}/>}
             {activeTab === 'scenes' && <Scenes scenes={projectData.scenes}/>}
             {activeTab === 'rewrite' && <Rewrite />}

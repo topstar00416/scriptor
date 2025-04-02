@@ -29,7 +29,7 @@ import GenerateInfo from '@views/Dashboard/Generate_info'
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 
-const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
+const ProjectManager = () => {
   const router = useRouter()
   const supabase = createClient()
   const params = useParams()
@@ -43,21 +43,35 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
     concept: ''
   })
 
-  const [logline, setLogline] = useState(props.logline || '')
+  const [logline, setLogline] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchProject = async () => {
-      const { data: projectData, error } = await supabase
-        .from('Project')
-        .select('*')
-        .eq('id', projectId)
-        .single()
+      // Fetch both project and logline data
+      const [projectResult, loglineResult] = await Promise.all([
+        supabase
+          .from('Project')
+          .select('*')
+          .eq('id', projectId)
+          .single(),
+        supabase
+          .from('Logline')
+          .select('description')
+          .eq('project_id', projectId)
+          .single()
+      ])
 
-      if (error) {
-        console.error('Error fetching project:', error)
+      if (projectResult.error) {
+        console.error('Error fetching project:', projectResult.error)
       } else {
-        setProjectData(projectData)
+        setProjectData(projectResult.data)
+      }
+
+      if (loglineResult.error) {
+        console.error('Error fetching logline:', loglineResult.error)
+      } else {
+        setLogline(loglineResult.data.description)
       }
     }
 
@@ -190,7 +204,6 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
                 variant='tonal'
                 color='primary'
                 startIcon={<i className='bx-magic-2' />}
-                className='ml-2'
               >
                 Edit
               </Button>
