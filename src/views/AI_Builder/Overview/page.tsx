@@ -204,6 +204,7 @@ const ProjectManager = () => {
                 variant='tonal'
                 color='primary'
                 startIcon={<i className='bx-magic-2' />}
+                className='ml-2'
               >
                 Edit
               </Button>
