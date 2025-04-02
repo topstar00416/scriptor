@@ -47,12 +47,6 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (props.logline) {
-      setLogline(props.logline)
-    }
-  }, [props.logline])
-
-  useEffect(() => {
     const fetchProject = async () => {
       const { data: projectData, error } = await supabase
         .from('Project')

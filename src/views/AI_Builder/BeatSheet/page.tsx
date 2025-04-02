@@ -71,7 +71,12 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
 
   return (
     <Card className='w-full h-full'>
-      <CardContent className='flex flex-col gap-6 h-full'>
+      <CardContent className='flex flex-col gap-6 h-full relative'>
+        {isLoading && (
+          <div className='absolute inset-0 bg-black/[0.3] flex items-center justify-center z-10'>
+            <CircularProgress size={40} />
+          </div>
+        )}
         <form>
           <div className='flex flex-wrap items-center justify-between gap-4'>
             <div>
@@ -80,23 +85,25 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
               </Typography>
             </div>
             <div className='flex'>
-                <Button
-                    onClick={handleRegenerate}
-                    variant='tonal'
-                    color='primary'
-                    startIcon={<i className='bx-magic-2' />}
-                >
-                    Regenerate
-                </Button>
-                <Button
-                    variant='tonal'
-                    color='error'
-                    startIcon={<i className='bx-arrow-back' />}
-                    onClick={() => router.push('/home')}
-                    className='ml-2'
-                >
-                    Back
-                </Button>
+              <Button
+                onClick={handleRegenerate}
+                variant='tonal'
+                color='primary'
+                startIcon={<i className='bx-magic-2' />}
+                disabled={isLoading}
+              >
+                Regenerate
+              </Button>
+              <Button
+                variant='tonal'
+                color='error'
+                startIcon={<i className='bx-arrow-back' />}
+                onClick={() => router.push('/home')}
+                className='ml-2'
+                disabled={isLoading}
+              >
+                Back
+              </Button>
             </div>
           </div>
           <Divider flexItem className='mt-4 mb-4' />
@@ -112,11 +119,6 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
                     name={`beat_${index + 1}`}
                     value={beat}
                     disabled={isLoading}
-                    InputProps={{
-                      endAdornment: isLoading && (
-                        <CircularProgress size={20} />
-                      )
-                    }}
                   />
                 </Grid>
               ))
