@@ -77,8 +77,9 @@ const ProjectManager = () => {
   const handleRegenerate = async () => {
     try {
       setIsLoading(true)
-      console.log('123123123131231231')
       const result = await GenerateInfo(projectData, 'scenes')
+
+      setScenes(result.scenes)
       
       // First delete existing scenes
       const { error: deleteError } = await supabase
@@ -102,7 +103,6 @@ const ProjectManager = () => {
         })
       )
 
-      setScenes(result.scenes)
       swal('Success', 'Scenes regenerated successfully', 'success')
     } catch (error) {
       console.error('Error regenerating scenes:', error)
@@ -115,24 +115,37 @@ const ProjectManager = () => {
   const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { error } = await supabase
-      .from('Scene')
-      .update({ description: scenes })
-      .eq('project_id', projectId)
+    try {
+      const { error } = await supabase
+        .from('Scene')
+        .update({ description: scenes })
+        .eq('project_id', projectId)
 
-    if (error) {
+      if (error) {
+        console.error('Error updating scenes:', error)
+        swal('Error', 'Failed to update scenes', 'error')
+      } else {
+        swal('Success', 'Scenes updated successfully', 'success')
+      }
+    } catch (error) {
       console.error('Error updating scenes:', error)
       swal('Error', 'Failed to update scenes', 'error')
-    } else {
-      swal('Success', 'Scenes updated successfully', 'success')
     }
+  }
+
+  const handleChange = (index: number, value: string) => {
+    setScenes(prevScenes => {
+      const updatedScenes = [...prevScenes]
+      updatedScenes[index] = value
+      return updatedScenes
+    })
   }
 
   return (
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
         <CardContent className='flex flex-col gap-6 h-full'>
-          <form onSubmit={handleEdit}>
+        <form onSubmit={handleEdit}>
             <div className='flex flex-wrap items-center justify-between gap-4'>
               <div>
                 <Typography variant='h3'>
@@ -182,11 +195,7 @@ const ProjectManager = () => {
                       name={`scene_${index + 1}`}
                       value={scene}
                       disabled={isLoading}
-                      InputProps={{
-                        endAdornment: isLoading && (
-                          <CircularProgress size={20} />
-                        )
-                      }}
+                      onChange={(e) => handleChange(index, e.target.value)}
                     />
                   </Grid>
                 ))}

@@ -83,12 +83,6 @@ const Dashboard = () => {
           closeOnClickOutside: false
         })
 
-        // Delete related data first
-        await supabase.from('Logline').delete().eq('project_id', projectId)
-        await supabase.from('BeatSheet').delete().eq('project_id', projectId)
-        await supabase.from('Scene').delete().eq('project_id', projectId)
-
-        // Now delete the project
         const { error } = await supabase.from('Project').delete().eq('id', projectId)
 
         if (error) throw error
@@ -138,12 +132,6 @@ const Dashboard = () => {
             <Grid item xs={12} md={4} key={project.id}>
               <div
                 className='border rounded bs-full h-[600px] flex flex-col'
-                onClick={e => {
-                  // Only navigate if the click is not on a button
-                  if (!(e.target as HTMLElement).closest('button')) {
-                    router.push(`/home/${project.id}/show`)
-                  }
-                }}
                 style={{ cursor: 'pointer' }}
               >
                 <div className='pli-2 pbs-2 border-radius-10 h-[250px]'>
@@ -198,9 +186,10 @@ const Dashboard = () => {
                       startIcon={<i className='bx-edit-alt' />}
                       onClick={e => {
                         e.stopPropagation()
-                        router.push(`/home/${project.id}/edit`)
+                        router.push(`/home/builder/${project.id}`)
                       }}
                       className='is-auto flex-auto'
+                      type='button'
                     >
                       Edit
                     </Button>

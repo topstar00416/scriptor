@@ -128,6 +128,14 @@ const ProjectManager = () => {
     }
   }
 
+  const handleChange = (index: number, value: string) => {
+    setBeatSheet(prevBeatSheet => {
+      const updatedBeatSheet = [...prevBeatSheet]
+      updatedBeatSheet[index] = value
+      return updatedBeatSheet
+    })
+  }
+
   // Sort the beatSheet array
   const sortedBeatSheet = [...beatSheet].sort((a, b) => {
     const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10)
@@ -195,6 +203,7 @@ const ProjectManager = () => {
                       label={`Beat ${index + 1}`}
                       name={`beat_${index + 1}`}
                       value={beat}
+                      onChange={(e) => handleChange(index, e.target.value)}
                       disabled={isLoading}
                     />
                   </Grid>
