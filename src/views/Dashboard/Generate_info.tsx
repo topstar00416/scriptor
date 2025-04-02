@@ -21,35 +21,50 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
     dangerouslyAllowBrowser: true
   })
 
+  console.log(projectData, target)
+
   const systemPrompt = `
-    Create a detailed logline, beat sheets, and scene outlines based on the provided title, tone, genre, and concept of a film script. Use each element to inform the structure and content of the outlines, ensuring that the logline succinctly captures the essence of the film, while the beat sheets outline the major plot points and the scenes provide detailed descriptions of specific moments in the story. 
+    You are tasked with generating components of a film script based on user-provided information. Your role is to create a logline, beat sheets, and scene outlines as required by the user, based on the specified title, tone, genre, and concept of the film.
+
+    ## Task
+    - Depending on the user's input, generate the desired elements:
+    - If the user inputs "Generate all values," provide a logline, beat sheets, and scene outlines.
+    - If the user specifies only one component (e.g., "Generate beat sheets"), only generate that specific content.
 
     ## Steps
-    - Start by formulating a compelling logline that summarizes the film's premise in one to two sentences. 
-    - Next, create a beat sheet that outlines the key events and turning points of the film. Aim for around 10-15 major beats. 
-    - Finally, generate a list of scene descriptions that detail particular moments in the story, including character actions, dialogues, and essential settings. It's important to align these scenes with the previously defined beats. 
+    1. Logline: Formulate a compelling logline summarizing the film's premise in one to two sentences.
+    2. Beat Sheet: Outline key events and turning points of the film, aiming for 10-15 major beats.
+    3. Scene Outlines: Create detailed descriptions of specific scenes, including character actions, dialogues, and essential settings, ensuring alignment with the defined beats.
 
-    ## Output Format
+    ## Output Format(change as user required)
     - Logline: [Your logline here]
-    - Beat Sheet: 
+    - Beat Sheet:
     1. [Beat 1 description here]
     2. [Beat 2 description here]
     ...
-    - Scene Outlines: 
-    1: [Description of scene 1]
-    2: [Description of scene 2]
+    - Scene Outlines:
+    1. [Description of scene 1]
+    2. [Description of scene 2]
     ...
 
     ## Notes
-    - Ensure that the generated content is cohesive and reflects the provided tone, genre, and concept accurately.
-    - Focus on creating engaging and creative content that can be utilized for further film script development.
+    - Ensure the content is cohesive and accurately reflects the provided tone, genre, and concept.
+    - Maintain a formal tone throughout the response.
+    - Focus on creating engaging and creative content suitable for further film script development.
+
+    ## User Input Example
+    - Title: "The Last Journey"
+    - Genre: Sci-Fi
+    - Tone: Formal
+    - Concept: A group of explorers travels to a distant planet, uncovering secrets that could change humanity forever.
+    - User Request: "Generate all values" or "Generate beat sheets" or "Generate scene outlines"
   `
 
   const targetPrompts = {
-    logline: 'Only generate a logline.',
-    beatSheet: 'Please give me a Beat Sheet.',
-    scenes: 'Only generate scene outlines.',
-    all: systemPrompt // Using the existing full systemPrompt
+    logline: 'Generate logline',
+    beatSheet: 'Generate beat sheets',
+    scenes: 'Generate scene outlines',
+    all: 'Generate all values' // Using the existing full systemPrompt
   }
 
   try {
@@ -62,6 +77,8 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
     })
 
     const content = response.choices[0]?.message?.content || ''
+
+    console.log(content)
 
     // Extract logline
     const loglineMatch = content.match(/Logline: (.*?)(?=\n|$)/)
@@ -94,7 +111,7 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
     }
   } catch (error) {
     console.error('Error generating content:', error)
-    
+
     return {
       logline: '',
       beatSheet: [],

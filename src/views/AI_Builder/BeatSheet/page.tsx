@@ -23,10 +23,12 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { createClient } from '@configs/supabase'
 import GenerateInfo from '@views/Dashboard/Generate_info'
 
-const ProjectManager = (props: { beatSheet: string[] }) => {
+const ProjectManager = () => {
   const router = useRouter()
   const supabase = createClient()
   const params = useParams()
+
+  const projectId = params.id as string
 
   const [projectData, setProjectData] = useState({
     title: '',
@@ -35,46 +37,72 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
     concept: ''
   })
 
-  const projectId = params.id as string
+  const [beatSheet, setBeatSheet] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const fetchProject = async () => {
-      const { data: projectData, error } = await supabase
-        .from('Project')
-        .select('*')
-        .eq('id', projectId)
-        .single()
+    const fetchData = async () => {
+      // Fetch both project and beat sheet data
+      const [projectResult, beatSheetResult] = await Promise.all([
+        supabase
+          .from('Project')
+          .select('*')
+          .eq('id', projectId)
+          .single(),
+        supabase
+          .from('BeatSheet')
+          .select('description')
+          .eq('project_id', projectId)
+      ])
 
-      if (error) {
-        console.error('Error fetching project:', error)
+      if (projectResult.error) {
+        console.error('Error fetching project:', projectResult.error)
       } else {
-        setProjectData(projectData)
+        setProjectData(projectResult.data)
+      }
+
+      if (beatSheetResult.error) {
+        console.error('Error fetching beat sheet:', beatSheetResult.error)
+      } else {
+        // Map the descriptions to an array
+        const beats = beatSheetResult.data.map(item => item.description)
+
+        setBeatSheet(beats)
       }
     }
 
-    fetchProject()
+    fetchData()
   }, [projectId, supabase])
-
-  // Add state for beatSheet
-  // const [beatSheet, setBeatSheet] = useState(props.beatSheet)
-
-  // Add loading state
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleRegenerate = async () => {
     try {
       setIsLoading(true)
       const result = await GenerateInfo(projectData, 'beatSheet')
+
+      setBeatSheet(result.beatSheet)
       
-      // setBeatSheet(result.beatSheet)
-      
-      // Update in database (assuming you have a BeatSheet table)
-      const { error } = await supabase
+      // First delete existing beats
+      const { error: deleteError } = await supabase
         .from('BeatSheet')
-        .update({ description: result.beatSheet })
+        .delete()
         .eq('project_id', projectId)
 
-      if (error) throw error
+      if (deleteError) throw deleteError
+
+      // Then insert new beats
+      await Promise.all(
+        result.beatSheet.map(async (beat) => {
+          const { error: insertError } = await supabase
+            .from('BeatSheet')
+            .insert({
+              project_id: projectId,
+              description: beat
+            })
+
+          if (insertError) throw insertError
+        })
+      )
+
       swal('Success', 'Beat sheet regenerated successfully', 'success')
     } catch (error) {
       console.error('Error regenerating beat sheet:', error)
@@ -85,10 +113,10 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
   }
 
   // Sort the beatSheet array
-  const sortedBeatSheet = [...props.beatSheet].sort((a, b) => {
+  const sortedBeatSheet = [...beatSheet].sort((a, b) => {
     const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10)
     const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10)
-
+    
     return numA - numB
   })
 
@@ -96,7 +124,7 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
         <CardContent className='flex flex-col gap-6 h-full'>
-          <form>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className='flex flex-wrap items-center justify-between gap-4'>
               <div>
                 <Typography variant='h3'>
@@ -104,32 +132,33 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
                 </Typography>
               </div>
               <div className='flex'>
-                  <Button
-                      onClick={handleRegenerate}
-                      variant='tonal'
-                      color='primary'
-                      startIcon={<i className='bx-magic-2' />}
-                  >
-                      Regenerate
-                  </Button>
-                  <Button
-                      onClick={handleRegenerate}
-                      variant='tonal'
-                      color='primary'
-                      startIcon={<i className='bx-magic-2' />}
-                      className='ml-2'
-                  >
-                      Edit
-                  </Button>
-                  <Button
-                      variant='tonal'
-                      color='error'
-                      startIcon={<i className='bx-arrow-back' />}
-                      onClick={() => router.push('/home')}
-                      className='ml-2'
-                  >
-                      Back
-                  </Button>
+                <Button
+                  onClick={handleRegenerate}
+                  variant='tonal'
+                  color='primary'
+                  startIcon={<i className='bx-magic-2' />}
+                  disabled={isLoading}
+                >
+                  Regenerate
+                </Button>
+                <Button
+                  type='button'
+                  variant='tonal'
+                  color='primary'
+                  startIcon={<i className='bx-magic-2' />}
+                  className='ml-2'
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant='tonal'
+                  color='error'
+                  startIcon={<i className='bx-arrow-back' />}
+                  onClick={() => router.push('/home')}
+                  className='ml-2'
+                >
+                  Back
+                </Button>
               </div>
             </div>
             <Divider flexItem className='mt-4 mb-4' />
@@ -149,6 +178,12 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
                       label={`Beat ${index + 1}`}
                       name={`beat_${index + 1}`}
                       value={beat}
+                      disabled={isLoading}
+                      InputProps={{
+                        endAdornment: isLoading && (
+                          <CircularProgress size={20} />
+                        )
+                      }}
                     />
                   </Grid>
                 ))}
