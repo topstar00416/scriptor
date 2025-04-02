@@ -19,9 +19,11 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
+import generateInfo from '@views/Dashboard/Generate_info'
 import GenerateInfo from '@views/Dashboard/Generate_info'
 
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
@@ -41,7 +43,14 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
     concept: ''
   })
 
-  const [logline, setLogline] = useState(props.logline)
+  const [logline, setLogline] = useState(props.logline || '')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (props.logline) {
+      setLogline(props.logline)
+    }
+  }, [props.logline])
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -68,6 +77,7 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
 
   const handleRegenerate = async () => {
     try {
+      setIsLoading(true)
       const result = await GenerateInfo(projectData, 'logline')
       setLogline(result.logline)
       
@@ -82,6 +92,8 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
     } catch (error) {
       console.error('Error regenerating logline:', error)
       swal('Error', 'Failed to regenerate logline', 'error')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -208,6 +220,12 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
                 name='logline'
                 value={logline}
                 onChange={handleLoglineChange}
+                disabled={isLoading}
+                InputProps={{
+                  endAdornment: isLoading && (
+                    <CircularProgress size={20} />
+                  )
+                }}
               />
             </Grid>
           </Grid>

@@ -18,6 +18,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
@@ -32,9 +33,11 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
 
   // Add state for beatSheet
   const [beatSheet, setBeatSheet] = useState(props.beatSheet)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleRegenerate = async () => {
     try {
+      setIsLoading(true)
       const { data: projectData } = await supabase
         .from('Project')
         .select('*')
@@ -44,7 +47,6 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
       const result = await GenerateInfo(projectData, 'beatSheet')
       setBeatSheet(result.beatSheet)
       
-      // Update in database (assuming you have a BeatSheet table)
       const { error } = await supabase
         .from('BeatSheet')
         .update({ beats: result.beatSheet })
@@ -55,6 +57,8 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
     } catch (error) {
       console.error('Error regenerating beat sheet:', error)
       swal('Error', 'Failed to regenerate beat sheet', 'error')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -107,6 +111,12 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
                     label={`Beat ${index + 1}`}
                     name={`beat_${index + 1}`}
                     value={beat}
+                    disabled={isLoading}
+                    InputProps={{
+                      endAdornment: isLoading && (
+                        <CircularProgress size={20} />
+                      )
+                    }}
                   />
                 </Grid>
               ))
