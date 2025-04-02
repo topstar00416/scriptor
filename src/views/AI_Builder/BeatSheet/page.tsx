@@ -18,6 +18,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
@@ -58,8 +59,12 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
   // Add state for beatSheet
   const [beatSheet, setBeatSheet] = useState(props.beatSheet)
 
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleRegenerate = async () => {
     try {
+      setIsLoading(true)
       const result = await GenerateInfo(projectData, 'beatSheet')
       setBeatSheet(result.beatSheet)
       
@@ -74,6 +79,8 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
     } catch (error) {
       console.error('Error regenerating beat sheet:', error)
       swal('Error', 'Failed to regenerate beat sheet', 'error')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -125,7 +132,11 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
           </div>
           <Divider flexItem className='mt-4 mb-4' />
           <Grid container spacing={2} className='mt-4'>
-            {
+            {isLoading ? (
+              <Grid item xs={12} className='flex justify-center items-center min-h-[200px]'>
+                <CircularProgress />
+              </Grid>
+            ) : (
               sortedBeatSheet.map((beat, index) => (
                 <Grid item xs={12} key={index}>
                   <TextField
@@ -138,7 +149,7 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
                   />
                 </Grid>
               ))
-            }
+            )}
           </Grid>
         </form>
       </CardContent>
