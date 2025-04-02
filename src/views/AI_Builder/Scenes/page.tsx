@@ -33,21 +33,40 @@ const ProjectManager = (props: { scenes: string[] }) => {
 
   const projectId = params.projectId as string
 
-  const handleRegenerate = async () => {
-    try {
-      const { data: projectData } = await supabase
+  const [projectData, setProjectData] = useState({
+    title: '',
+    genre: '',
+    tone: '',
+    concept: ''
+  })
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      const { data: projectData, error } = await supabase
         .from('Project')
         .select('*')
         .eq('id', projectId)
         .single()
 
+      if (error) {
+        console.error('Error fetching project:', error)
+      } else {
+        setProjectData(projectData)
+      }
+    }
+
+    fetchProject()
+  }, [projectId, supabase])
+
+  const handleRegenerate = async () => {
+    try {
       const result = await GenerateInfo(projectData, 'scenes')
       setScenes(result.scenes)
       
       // Update in database (assuming you have a Scenes table)
       const { error } = await supabase
         .from('Scenes')
-        .update({ scenes: result.scenes })
+        .update({ description: result.scenes })
         .eq('project_id', projectId)
 
       if (error) throw error

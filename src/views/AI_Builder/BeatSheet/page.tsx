@@ -18,7 +18,6 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
-import CircularProgress from '@mui/material/CircularProgress'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
@@ -29,27 +28,45 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
   const supabase = createClient()
   const params = useParams()
 
-  const projectId = params.projectId as string
+  const [projectData, setProjectData] = useState({
+    title: '',
+    genre: '',
+    tone: '',
+    concept: ''
+  })
 
-  // Add state for beatSheet
-  const [beatSheet, setBeatSheet] = useState(props.beatSheet)
-  const [isLoading, setIsLoading] = useState(false)
+  const projectId = params.id as string
 
-  const handleRegenerate = async () => {
-    try {
-      setIsLoading(true)
-      const { data: projectData } = await supabase
+  useEffect(() => {
+    const fetchProject = async () => {
+      const { data: projectData, error } = await supabase
         .from('Project')
         .select('*')
         .eq('id', projectId)
         .single()
 
+      if (error) {
+        console.error('Error fetching project:', error)
+      } else {
+        setProjectData(projectData)
+      }
+    }
+
+    fetchProject()
+  }, [projectId, supabase])
+
+  // Add state for beatSheet
+  const [beatSheet, setBeatSheet] = useState(props.beatSheet)
+
+  const handleRegenerate = async () => {
+    try {
       const result = await GenerateInfo(projectData, 'beatSheet')
       setBeatSheet(result.beatSheet)
       
+      // Update in database (assuming you have a BeatSheet table)
       const { error } = await supabase
         .from('BeatSheet')
-        .update({ beats: result.beatSheet })
+        .update({ description: result.beatSheet })
         .eq('project_id', projectId)
 
       if (error) throw error
@@ -57,8 +74,6 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
     } catch (error) {
       console.error('Error regenerating beat sheet:', error)
       swal('Error', 'Failed to regenerate beat sheet', 'error')
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -71,12 +86,7 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
 
   return (
     <Card className='w-full h-full'>
-      <CardContent className='flex flex-col gap-6 h-full relative'>
-        {isLoading && (
-          <div className='absolute inset-0 bg-black/[0.3] flex items-center justify-center z-10'>
-            <CircularProgress size={40} />
-          </div>
-        )}
+      <CardContent className='flex flex-col gap-6 h-full'>
         <form>
           <div className='flex flex-wrap items-center justify-between gap-4'>
             <div>
@@ -85,25 +95,32 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
               </Typography>
             </div>
             <div className='flex'>
-              <Button
-                onClick={handleRegenerate}
-                variant='tonal'
-                color='primary'
-                startIcon={<i className='bx-magic-2' />}
-                disabled={isLoading}
-              >
-                Regenerate
-              </Button>
-              <Button
-                variant='tonal'
-                color='error'
-                startIcon={<i className='bx-arrow-back' />}
-                onClick={() => router.push('/home')}
-                className='ml-2'
-                disabled={isLoading}
-              >
-                Back
-              </Button>
+                <Button
+                    onClick={handleRegenerate}
+                    variant='tonal'
+                    color='primary'
+                    startIcon={<i className='bx-magic-2' />}
+                >
+                    Regenerate
+                </Button>
+                <Button
+                    onClick={handleRegenerate}
+                    variant='tonal'
+                    color='primary'
+                    startIcon={<i className='bx-magic-2' />}
+                    className='ml-2'
+                >
+                    Edit
+                </Button>
+                <Button
+                    variant='tonal'
+                    color='error'
+                    startIcon={<i className='bx-arrow-back' />}
+                    onClick={() => router.push('/home')}
+                    className='ml-2'
+                >
+                    Back
+                </Button>
             </div>
           </div>
           <Divider flexItem className='mt-4 mb-4' />
@@ -118,7 +135,6 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
                     label={`Beat ${index + 1}`}
                     name={`beat_${index + 1}`}
                     value={beat}
-                    disabled={isLoading}
                   />
                 </Grid>
               ))
