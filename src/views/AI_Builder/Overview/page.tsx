@@ -40,6 +40,8 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
     concept: ''
   })
 
+  const [logline, setLogline] = useState(props.logline)
+
   useEffect(() => {
     const fetchProject = async () => {
       const { data: projectData, error } = await supabase
@@ -59,10 +61,30 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
   }, [projectId, supabase])
   
 
+  const handleLoglineChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLogline(event.target.value)
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const { error } = await supabase
+      .from('Logline')
+      .update({ description: logline })
+      .eq('project_id', projectId)
+
+    if (error) {
+      console.error('Error updating logline:', error)
+      swal('Error', 'Failed to update logline', 'error')
+    } else {
+      swal('Success', 'Logline updated successfully', 'success')
+    }
+  }
+
   return (
     <Card className='w-full h-full'>
       <CardContent className='flex flex-col gap-6 h-full'>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className='flex flex-wrap items-center justify-between gap-4'>
             <div>
               <Typography variant='h3'>
@@ -138,6 +160,14 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
                 Regenerate
               </Button>
               <Button
+                type='submit'
+                variant='tonal'
+                color='primary'
+                startIcon={<i className='bx-magic-2' />}
+              >
+                Edit
+              </Button>
+              <Button
                 variant='tonal'
                 color='error'
                 startIcon={<i className='bx-arrow-back' />}
@@ -156,7 +186,8 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
                 rows={4}
                 label='Logline'
                 name='logline'
-                value={props.logline}
+                value={logline}
+                onChange={handleLoglineChange}
               />
             </Grid>
           </Grid>

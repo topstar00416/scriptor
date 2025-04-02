@@ -72,7 +72,6 @@ const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent>
       : []
 
     // Extract scenes
-    console.log(content)
     const scenesMatch = content.match(/Scene Outlines:([\s\S]*)$/)
     const scenes = scenesMatch
       ? scenesMatch[1]
@@ -80,8 +79,6 @@ const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent>
           .filter(line => line.trim().match(/^\d+:/))
           .map(line => line.replace(/^\d+:\s*/, '').trim())
       : []
-
-      console.log(scenes)
 
     return {
       logline,
