@@ -38,34 +38,9 @@ const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent>
     2. [Beat 2 description here]
     ...
     - Scene Outlines: 
-    - Scene 1: [Description of scene 1]
-    - Scene 2: [Description of scene 2]
+    1: [Description of scene 1]
+    2: [Description of scene 2]
     ...
-
-    ## Examples
-    1. Title: 'The Last Voyage'
-    Tone: Dark and suspenseful
-    Genre: Thriller
-    Concept: A group of friends on a sailing trip find themselves lost at sea during a storm with a hidden danger lurking.
-
-    Logline: A group of friends on a sailing trip must survive when they are lost at sea during a storm, and a mysterious presence threatens their lives.
-
-    Beat Sheet: 
-    1. Introduction of the friends and their carefree dynamics.
-    2. Onset of the storm and losing contact with the mainland...
-    3. [And so forth]
-
-    2. Title: 'Love Unbound'
-    Tone: Romantic and heartwarming
-    Genre: Romantic Comedy
-    Concept: Two rival bakers must team up to save their shops but end up falling for each other. 
-
-    Logline: Two competitive bakers must join forces to save their dying shops, unexpectedly discovering love along the way.
-
-    Beat Sheet: 
-    1. Introduction of the rivalry and low points for both bakers. 
-    2. Circumstance forces them to collaborate...
-    3. [And so forth] 
 
     ## Notes
     - Ensure that the generated content is cohesive and reflects the provided tone, genre, and concept accurately.
@@ -97,13 +72,16 @@ const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent>
       : []
 
     // Extract scenes
+    console.log(content)
     const scenesMatch = content.match(/Scene Outlines:([\s\S]*)$/)
     const scenes = scenesMatch
       ? scenesMatch[1]
           .split('\n')
-          .filter(line => line.trim().startsWith('Scene'))
-          .map(line => line.replace(/^Scene \d+: /, '').trim())
+          .filter(line => line.trim().match(/^\d+:/))
+          .map(line => line.replace(/^\d+:\s*/, '').trim())
       : []
+
+      console.log(scenes)
 
     return {
       logline,
