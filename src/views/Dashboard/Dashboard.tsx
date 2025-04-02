@@ -83,6 +83,12 @@ const Dashboard = () => {
           closeOnClickOutside: false
         })
 
+        // Delete related data first
+        await supabase.from('Logline').delete().eq('project_id', projectId)
+        await supabase.from('BeatSheet').delete().eq('project_id', projectId)
+        await supabase.from('Scene').delete().eq('project_id', projectId)
+
+        // Now delete the project
         const { error } = await supabase.from('Project').delete().eq('id', projectId)
 
         if (error) throw error
