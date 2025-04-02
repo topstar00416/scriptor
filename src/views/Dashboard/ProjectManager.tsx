@@ -164,7 +164,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             icon: 'success'
           })
 
-          const generatedContent = await GenerateInfo(submitData)
+          const generatedContent = await GenerateInfo(submitData, 'all')
 
           console.log(generatedContent)
 

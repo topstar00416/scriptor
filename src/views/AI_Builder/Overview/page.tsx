@@ -22,6 +22,7 @@ import Divider from '@mui/material/Divider'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
+import GenerateInfo from '@views/Dashboard/Generate_info'
 
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
@@ -63,6 +64,25 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
 
   const handleLoglineChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLogline(event.target.value)
+  }
+
+  const handleRegenerate = async () => {
+    try {
+      const result = await GenerateInfo(projectData, 'logline')
+      setLogline(result.logline)
+      
+      // Update in database
+      const { error } = await supabase
+        .from('Logline')
+        .update({ description: result.logline })
+        .eq('project_id', projectId)
+
+      if (error) throw error
+      swal('Success', 'Logline regenerated successfully', 'success')
+    } catch (error) {
+      console.error('Error regenerating logline:', error)
+      swal('Error', 'Failed to regenerate logline', 'error')
+    }
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -152,7 +172,7 @@ const ProjectManager = (props: { logline: string, beatSheet: string[] }) => {
             </Typography>
             <div className='flex'>
               <Button
-                type='submit'
+                onClick={handleRegenerate}
                 variant='tonal'
                 color='primary'
                 startIcon={<i className='bx-magic-2' />}

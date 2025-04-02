@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
-
+import { useParams } from 'next/navigation'
 // External Imports
 import swal from 'sweetalert'
 
@@ -14,21 +14,49 @@ import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
-import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
-
-const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
-const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
+import GenerateInfo from '@views/Dashboard/Generate_info'
 
 const ProjectManager = (props: { scenes: string[] }) => {
   const router = useRouter()
   const supabase = createClient()
 
+  // Add state for scenes
+  const [scenes, setScenes] = useState(props.scenes)
+
+  const params = useParams()
+
+  const projectId = params.projectId as string
+
+  const handleRegenerate = async () => {
+    try {
+      const { data: projectData } = await supabase
+        .from('Project')
+        .select('*')
+        .eq('id', projectId)
+        .single()
+
+      const result = await GenerateInfo(projectData, 'scenes')
+      setScenes(result.scenes)
+      
+      // Update in database (assuming you have a Scenes table)
+      const { error } = await supabase
+        .from('Scenes')
+        .update({ scenes: result.scenes })
+        .eq('project_id', projectId)
+
+      if (error) throw error
+      swal('Success', 'Scenes regenerated successfully', 'success')
+    } catch (error) {
+      console.error('Error regenerating scenes:', error)
+      swal('Error', 'Failed to regenerate scenes', 'error')
+    }
+  }
 
   useEffect(() => {
   }, [])
@@ -49,8 +77,17 @@ const ProjectManager = (props: { scenes: string[] }) => {
                     variant='tonal'
                     color='primary'
                     startIcon={<i className='bx-magic-2' />}
+                    onClick={handleRegenerate}
                 >
                     Regenerate
+                </Button>
+                <Button
+                    type='submit'
+                    variant='tonal'
+                    color='primary'
+                    startIcon={<i className='bx-magic-2' />}
+                >
+                    Edit
                 </Button>
                 <Button
                     variant='tonal'
@@ -66,7 +103,7 @@ const ProjectManager = (props: { scenes: string[] }) => {
           <Divider flexItem className='mt-4 mb-4' />
           <Grid container spacing={2} className='mt-4'>
             {
-              props.scenes.map((scene, index) => (
+              scenes.map((scene, index) => (
                 <Grid item xs={12} key={index}>
                   <TextField
                     fullWidth

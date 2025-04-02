@@ -8,7 +8,6 @@ interface ProjectData {
   genre: string
   tone: string
   concept: string
-  imageUrl: string
 }
 
 interface GeneratedContent {
@@ -17,7 +16,7 @@ interface GeneratedContent {
   scenes: string[]
 }
 
-const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent> => {
+const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatSheet' | 'scenes' | 'all'): Promise<GeneratedContent> => {
   const openai = new OpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
@@ -47,12 +46,19 @@ const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent>
     - Focus on creating engaging and creative content that can be utilized for further film script development.
   `
 
+  const targetPrompts = {
+    logline: 'Only generate a logline.',
+    beatSheet: 'Only generate a beat sheet.',
+    scenes: 'Only generate a list of scene descriptions.',
+    all: systemPrompt // Using the existing full systemPrompt
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Title: ${projectData.title}\nTone: ${projectData.tone}\nGenre: ${projectData.genre}\nConcept: ${projectData.concept}` },
+        { role: 'user', content: `Title: ${projectData.title}\nTone: ${projectData.tone}\nGenre: ${projectData.genre}\nConcept: ${projectData.concept} \nTarget: ${targetPrompts[target]}` },
       ],
     })
 
@@ -95,4 +101,4 @@ const generateInfo = async (projectData: ProjectData): Promise<GeneratedContent>
   }
 }
 
-export default generateInfo
+export default GenerateInfo

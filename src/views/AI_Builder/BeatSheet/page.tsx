@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 // External Imports
 import swal from 'sweetalert'
@@ -20,9 +21,42 @@ import Divider from '@mui/material/Divider'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
+import GenerateInfo from '@views/Dashboard/Generate_info'
 
 const ProjectManager = (props: { beatSheet: string[] }) => {
   const router = useRouter()
+  const supabase = createClient()
+  const params = useParams()
+
+  const projectId = params.projectId as string
+
+  // Add state for beatSheet
+  const [beatSheet, setBeatSheet] = useState(props.beatSheet)
+
+  const handleRegenerate = async () => {
+    try {
+      const { data: projectData } = await supabase
+        .from('Project')
+        .select('*')
+        .eq('id', projectId)
+        .single()
+
+      const result = await GenerateInfo(projectData, 'beatSheet')
+      setBeatSheet(result.beatSheet)
+      
+      // Update in database (assuming you have a BeatSheet table)
+      const { error } = await supabase
+        .from('BeatSheet')
+        .update({ beats: result.beatSheet })
+        .eq('project_id', projectId)
+
+      if (error) throw error
+      swal('Success', 'Beat sheet regenerated successfully', 'success')
+    } catch (error) {
+      console.error('Error regenerating beat sheet:', error)
+      swal('Error', 'Failed to regenerate beat sheet', 'error')
+    }
+  }
 
   // Sort the beatSheet array
   const sortedBeatSheet = [...props.beatSheet].sort((a, b) => {
@@ -43,7 +77,7 @@ const ProjectManager = (props: { beatSheet: string[] }) => {
             </div>
             <div className='flex'>
                 <Button
-                    type='submit'
+                    onClick={handleRegenerate}
                     variant='tonal'
                     color='primary'
                     startIcon={<i className='bx-magic-2' />}
