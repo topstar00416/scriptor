@@ -51,7 +51,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
     imageUrl: ''
   })
 
-  const [generatedContent, setGeneratedContent] = useState<GeneratedContent>({
+  const [, setGeneratedContent] = useState<GeneratedContent>({
     logline: '',
     beatSheet: [],
     scenes: []
@@ -176,6 +176,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
                 project_id: newProject.id,
                 description: item
               })
+
               if (newBeatSheetError) throw newBeatSheetError
             }),
             ...generatedContent.scenes.map(async item => {
@@ -183,6 +184,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
                 project_id: newProject.id,
                 description: item
               })
+              
               if (newSceneError) throw newSceneError
             })
           ])

@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import OpenAI from 'openai'
 
 interface ProjectData {
@@ -48,8 +47,8 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
 
   const targetPrompts = {
     logline: 'Only generate a logline.',
-    beatSheet: 'Only generate a beat sheet.',
-    scenes: 'Only generate a list of scene descriptions.',
+    beatSheet: 'Please give me a Beat Sheet.',
+    scenes: 'Only generate scene outlines.',
     all: systemPrompt // Using the existing full systemPrompt
   }
 
@@ -70,6 +69,7 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
 
     // Extract beat sheet
     const beatSheetMatch = content.match(/Beat Sheet:([\s\S]*?)(?=Scene Outlines:|$)/)
+
     const beatSheet = beatSheetMatch
       ? beatSheetMatch[1]
           .split('\n')
@@ -79,6 +79,7 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
 
     // Extract scenes
     const scenesMatch = content.match(/Scene Outlines:([\s\S]*)$/)
+
     const scenes = scenesMatch
       ? scenesMatch[1]
           .split('\n')
@@ -93,6 +94,7 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
     }
   } catch (error) {
     console.error('Error generating content:', error)
+    
     return {
       logline: '',
       beatSheet: [],

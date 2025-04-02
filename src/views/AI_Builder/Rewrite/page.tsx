@@ -1,13 +1,10 @@
 'use client'
 
 // React Imports
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
-
-// External Imports
-import swal from 'sweetalert'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -19,21 +16,11 @@ import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Divider from '@mui/material/Divider'
 
-// Internal Imports
-import { createClient } from '@configs/supabase'
-
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 
-interface ProjectManagerProps {
-  mode: 'create' | 'edit' | 'show'
-  projectId?: string
-}
-
 const ProjectManager = () => {
   const router = useRouter()
-  const supabase = createClient()
-
 
   useEffect(() => {
   }, [])
@@ -56,6 +43,7 @@ const ProjectManager = () => {
                 fullWidth
                 label='Title'
                 name='title'
+
                 // value={data.title}
                 // onChange={handleChange}
                 // disabled={isReadOnly}
@@ -67,6 +55,7 @@ const ProjectManager = () => {
                 select
                 label='Genre'
                 name='genre'
+
                 // value={data.genre}
                 // onChange={handleChange}
                 // disabled={isReadOnly}
@@ -84,6 +73,7 @@ const ProjectManager = () => {
                 select
                 label='Tone'
                 name='tone'
+
                 // value={data.tone}
                 // onChange={handleChange}
                 // disabled={isReadOnly}
@@ -104,6 +94,7 @@ const ProjectManager = () => {
                 rows={4}
                 label='Concept'
                 name='concept'
+                
                 // value={data.concept}
                 // onChange={handleChange}
                 // disabled={isReadOnly}

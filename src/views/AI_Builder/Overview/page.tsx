@@ -4,8 +4,7 @@
 import { useState, useEffect } from 'react'
 
 // Next Imports
-import { useRouter } from 'next/navigation'
-import { useParams } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 // External Imports
 import swal from 'sweetalert'
@@ -23,7 +22,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 // Internal Imports
 import { createClient } from '@configs/supabase'
-import generateInfo from '@views/Dashboard/Generate_info'
 import GenerateInfo from '@views/Dashboard/Generate_info'
 
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
@@ -87,6 +85,7 @@ const ProjectManager = () => {
     try {
       setIsLoading(true)
       const result = await GenerateInfo(projectData, 'logline')
+      
       setLogline(result.logline)
       
       // Update in database

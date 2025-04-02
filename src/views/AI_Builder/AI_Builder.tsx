@@ -3,14 +3,16 @@
 // React Imports
 import { useEffect, useState } from 'react'
 import type { SyntheticEvent } from 'react'
+
 import { useParams } from 'next/navigation'
-import { createClient } from '@configs/supabase'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabPanel from '@mui/lab/TabPanel'
+
+import { createClient } from '@configs/supabase'
 
 // Component Imports
 import CustomTabList from '@core/components/mui/TabList'
@@ -35,12 +37,6 @@ interface SceneData {
   id: string
   project_id: string
   description: string
-}
-
-interface LoglineData {
-  id: string
-  projectId: string
-  logline: string
 }
 
 const AccountSettings = () => {
