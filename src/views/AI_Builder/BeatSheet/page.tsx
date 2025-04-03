@@ -131,7 +131,9 @@ const ProjectManager = () => {
   const handleChange = (index: number, value: string) => {
     setBeatSheet(prevBeatSheet => {
       const updatedBeatSheet = [...prevBeatSheet]
+      
       updatedBeatSheet[index] = value
+
       return updatedBeatSheet
     })
   }
@@ -166,7 +168,7 @@ const ProjectManager = () => {
                 >
                   Regenerate
                 </Button>
-                <Button
+                {/* <Button
                   type='submit'
                   variant='tonal'
                   color='primary'
@@ -174,7 +176,7 @@ const ProjectManager = () => {
                   className='ml-2'
                 >
                   Edit
-                </Button>
+                </Button> */}
                 <Button
                   variant='tonal'
                   color='error'

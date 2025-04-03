@@ -136,7 +136,9 @@ const ProjectManager = () => {
   const handleChange = (index: number, value: string) => {
     setScenes(prevScenes => {
       const updatedScenes = [...prevScenes]
+      
       updatedScenes[index] = value
+
       return updatedScenes
     })
   }
@@ -162,7 +164,7 @@ const ProjectManager = () => {
                 >
                   Regenerate
                 </Button>
-                <Button
+                {/* <Button
                   type='submit'
                   variant='tonal'
                   color='primary'
@@ -170,7 +172,7 @@ const ProjectManager = () => {
                   className='ml-2'
                 >
                   Edit
-                </Button>
+                </Button> */}
                 <Button
                   variant='tonal'
                   color='error'
@@ -184,6 +186,11 @@ const ProjectManager = () => {
             </div>
             <Divider flexItem className='mt-4 mb-4' />
             <div className='relative'>
+              {isLoading && (
+                <div className='absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50'>
+                  <CircularProgress />
+                </div>
+              )}
               <Grid container spacing={2} className='mt-4'>
                 {scenes.map((scene, index) => (
                   <Grid item xs={12} key={index}>
