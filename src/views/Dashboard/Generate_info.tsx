@@ -111,7 +111,7 @@ const GenerateInfo = async (
     let sceneRegex: RegExp
 
     if (flag) {
-      sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
+      sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
     } else {
       sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
       flag = true
