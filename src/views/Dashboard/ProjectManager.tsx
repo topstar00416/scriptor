@@ -168,6 +168,8 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
           setGeneratedContent(generatedContent)
 
+          console.log(generatedContent.beatSheet)
+
           await Promise.all([
             ...generatedContent.beatSheet.map(async beat => {
               const { error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
@@ -183,7 +185,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
                 project_id: newProject.id,
                 description: item
               })
-              
+
               if (newSceneError) throw newSceneError
             })
           ])
