@@ -75,8 +75,6 @@ const GenerateInfo = async (
 
     const content = response.choices[0]?.message?.content || ''
 
-    console.log(content)
-
     // Extract logline
     const loglineMatch = content.match(/Logline: (.*?)(?=\n|$)/)
     const logline = loglineMatch ? loglineMatch[1].trim() : ''
@@ -124,6 +122,8 @@ const GenerateInfo = async (
         return null
       })
       .filter(scene => scene !== null)
+
+    console.log(scenes)
 
     return {
       logline,
