@@ -15,7 +15,7 @@ interface GeneratedContent {
   scenes: { seq: number; name: string; description: string }[]
 }
 
-let flag = false
+// let flag = false
 
 const GenerateInfo = async (
   projectData: ProjectData,
