@@ -37,7 +37,7 @@ const ProjectManager = () => {
     concept: ''
   })
 
-  const [scenes, setScenes] = useState<string[]>([])
+  const [scenes, setScenes] = useState<{ title: string; name: string; description: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const ProjectManager = () => {
       setIsLoading(true)
       const result = await GenerateInfo(projectData, 'scenes')
 
-      setScenes(result.scenes)
+      setScenes(result.scenes as { title: string; name: string; description: string }[])
       
       // First delete existing scenes
       const { error: deleteError } = await supabase
@@ -137,7 +137,7 @@ const ProjectManager = () => {
     setScenes(prevScenes => {
       const updatedScenes = [...prevScenes]
       
-      updatedScenes[index] = value
+      updatedScenes[index].description = value
 
       return updatedScenes
     })

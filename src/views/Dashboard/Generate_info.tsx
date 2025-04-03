@@ -122,8 +122,6 @@ const GenerateInfo = async (
       }
     })
 
-    console.log(scenes)
-
     return {
       logline,
       beatSheet,

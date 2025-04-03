@@ -36,7 +36,7 @@ interface ProjectManagerProps {
 interface GeneratedContent {
   logline: string
   beatSheet: string[]
-  scenes: string[]
+  scenes: { title: string; name: string; description: string }[]
 }
 
 const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
@@ -168,7 +168,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
           console.log(generatedContent)
 
-          setGeneratedContent(generatedContent)
+          setGeneratedContent(generatedContent as GeneratedContent)
 
           await Promise.all([
             ...generatedContent.beatSheet.map(async item => {
