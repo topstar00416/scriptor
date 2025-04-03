@@ -35,8 +35,8 @@ interface ProjectManagerProps {
 
 interface GeneratedContent {
   logline: string
-  beatSheet: string[]
-  scenes: { title: string; name: string; description: string }[]
+  beatSheet: { seq: number; description: string }[]
+  scenes: object[]
 }
 
 const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
@@ -166,15 +166,14 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
           const generatedContent = await GenerateInfo(submitData, 'all')
 
-          console.log(generatedContent)
-
-          setGeneratedContent(generatedContent as GeneratedContent)
+          setGeneratedContent(generatedContent)
 
           await Promise.all([
-            ...generatedContent.beatSheet.map(async item => {
+            ...generatedContent.beatSheet.map(async beat => {
               const { error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
                 project_id: newProject.id,
-                description: item
+                seq: beat.seq,
+                description: beat.description
               })
 
               if (newBeatSheetError) throw newBeatSheetError

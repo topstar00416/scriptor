@@ -136,9 +136,14 @@ const ProjectManager = () => {
   const handleChange = (index: number, value: string) => {
     setScenes(prevScenes => {
       const updatedScenes = [...prevScenes]
+      const [name, ...descriptionParts] = value.split('\n')
       
-      updatedScenes[index].description = value
-
+      updatedScenes[index] = {
+        ...updatedScenes[index],
+        name: name.replace(':', '').trim(),
+        description: descriptionParts.join('\n').trim()
+      }
+      
       return updatedScenes
     })
   }
@@ -200,7 +205,7 @@ const ProjectManager = () => {
                       rows={4}
                       label={`Scene ${index + 1}`}
                       name={`scene_${index + 1}`}
-                      value={scene}
+                      value={`${scene.name}:\n${scene.description}`}
                       disabled={isLoading}
                       onChange={(e) => handleChange(index, e.target.value)}
                     />

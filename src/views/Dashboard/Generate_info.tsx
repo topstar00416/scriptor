@@ -11,7 +11,7 @@ interface ProjectData {
 
 interface GeneratedContent {
   logline: string
-  beatSheet: string[]
+  beatSheet: { seq: number; description: string }[]
   scenes: object[]
 }
 
@@ -94,7 +94,17 @@ const GenerateInfo = async (
       ? beatSheetMatch[1]
           .split('\n')
           .filter(line => line.trim().match(/^\d+\./))
-          .map(line => line.trim())
+          .map(line => {
+            const match = line.trim().match(/^(\d+)\.\s*(.*)$/)
+            if (match) {
+              return {
+                seq: parseInt(match[1], 10),
+                description: match[2].trim()
+              }
+            }
+            return null
+          })
+          .filter(item => item !== null)
       : []
 
     // Extract scenes
@@ -111,7 +121,7 @@ const GenerateInfo = async (
 
       if (match) {
         const sceneTitle = match[1].trim() // e.g., "Scene One"
-        const sceneName = match[2].trim() // e.g., "The Pilot’s Cockpit"
+        const sceneName = match[2].trim() // e.g., "The Pilot's Cockpit"
         const description = match[3].trim().replace(/\s+/g, ' ') // Clean whitespace
 
         scenes.push({

@@ -37,7 +37,7 @@ const ProjectManager = () => {
     concept: ''
   })
 
-  const [beatSheet, setBeatSheet] = useState<string[]>([])
+  const [beatSheet, setBeatSheet] = useState<{ seq: number; description: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const ProjectManager = () => {
           .single(),
         supabase
           .from('BeatSheet')
-          .select('description')
+          .select('seq, description')
           .eq('project_id', projectId)
       ])
 
@@ -65,7 +65,10 @@ const ProjectManager = () => {
         console.error('Error fetching beat sheet:', beatSheetResult.error)
       } else {
         // Map the descriptions to an array
-        const beats = beatSheetResult.data.map(item => item.description)
+        const beats = beatSheetResult.data.map(item => ({
+          seq: item.seq,
+          description: item.description
+        }))
 
         setBeatSheet(beats)
       }
@@ -96,7 +99,8 @@ const ProjectManager = () => {
             .from('BeatSheet')
             .insert({
               project_id: projectId,
-              description: beat
+              seq: beat.seq,
+              description: beat.description
             })
 
           if (insertError) throw insertError
@@ -115,35 +119,41 @@ const ProjectManager = () => {
   const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { error } = await supabase
-      .from('BeatSheet')
-      .update({ description: beatSheet })
-      .eq('project_id', projectId)
+    try {
+      // Update each beat individually
+      await Promise.all(
+        beatSheet.map(async (beat) => {
+          const { error } = await supabase
+            .from('BeatSheet')
+            .update({ description: beat.description })
+            .eq('project_id', projectId)
+            .eq('seq', beat.seq)
 
-    if (error) {
+          if (error) throw error
+        })
+      )
+
+      swal('Success', 'Beat sheet updated successfully', 'success')
+    } catch (error) {
       console.error('Error updating beat sheet:', error)
       swal('Error', 'Failed to update beat sheet', 'error')
-    } else {
-      swal('Success', 'Beat sheet updated successfully', 'success')
     }
   }
 
   const handleChange = (index: number, value: string) => {
     setBeatSheet(prevBeatSheet => {
       const updatedBeatSheet = [...prevBeatSheet]
-      
-      updatedBeatSheet[index] = value
-
+      updatedBeatSheet[index] = {
+        ...updatedBeatSheet[index],
+        description: value
+      }
       return updatedBeatSheet
     })
   }
 
   // Sort the beatSheet array
   const sortedBeatSheet = [...beatSheet].sort((a, b) => {
-    const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10)
-    const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10)
-
-    return numA - numB
+    return a.seq - b.seq
   })
 
   return (
@@ -202,9 +212,9 @@ const ProjectManager = () => {
                       fullWidth
                       multiline
                       rows={4}
-                      label={`Beat ${index + 1}`}
-                      name={`beat_${index + 1}`}
-                      value={beat}
+                      label={`Beat ${beat.seq}`}
+                      name={`beat_${beat.seq}`}
+                      value={beat.description}
                       onChange={(e) => handleChange(index, e.target.value)}
                       disabled={isLoading}
                     />
