@@ -157,7 +157,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
           setGeneratedContent(generatedContent)
 
-          console.log(generatedContent.beatSheet)
+          console.log(generatedContent.scenes)
 
           await Promise.all([
             ...generatedContent.beatSheet.map(async beat => {
