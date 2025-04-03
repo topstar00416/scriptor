@@ -107,6 +107,7 @@ const GenerateInfo = async (
     const scenesText = scenesMatch ? scenesMatch[1].trim().split(/\n(?=\d+\.\s+\*\*)/) : []
 
     console.log(scenesText)
+
     const scenes = scenesText
       ?.map((sceneText, index) => {
         const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
