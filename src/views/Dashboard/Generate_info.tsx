@@ -12,16 +12,17 @@ interface ProjectData {
 interface GeneratedContent {
   logline: string
   beatSheet: string[]
-  scenes: string[]
+  scenes: object[]
 }
 
-const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatSheet' | 'scenes' | 'all'): Promise<GeneratedContent> => {
+const GenerateInfo = async (
+  projectData: ProjectData,
+  target: 'logline' | 'beatSheet' | 'scenes' | 'all'
+): Promise<GeneratedContent> => {
   const openai = new OpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
   })
-
-  console.log(projectData, target)
 
   const systemPrompt = `
     You are tasked with generating components of a film script based on user-provided information. Your role is to create a logline, beat sheets, and scene outlines as required by the user, based on the specified title, tone, genre, and concept of the film.
@@ -63,7 +64,8 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
   const targetPrompts = {
     logline: 'Generate logline',
     beatSheet: 'Generate beat sheets',
-    scenes: 'You are a professional film scriptwriter. Based on the provided project details, write detailed outlines for 5 key scenes',
+    scenes:
+      'You are a professional film scriptwriter. Based on the provided project details, write detailed outlines for 5 key scenes',
     all: 'Generate all values' // Using the existing full systemPrompt
   }
 
@@ -72,13 +74,14 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Title: ${projectData.title}\nTone: ${projectData.tone}\nGenre: ${projectData.genre}\nConcept: ${projectData.concept} \nTarget: ${targetPrompts[target]}` },
-      ],
+        {
+          role: 'user',
+          content: `Title: ${projectData.title}\nTone: ${projectData.tone}\nGenre: ${projectData.genre}\nConcept: ${projectData.concept} \nRequest: ${targetPrompts[target]}`
+        }
+      ]
     })
 
     const content = response.choices[0]?.message?.content || ''
-
-    console.log(content)
 
     // Extract logline
     const loglineMatch = content.match(/Logline: (.*?)(?=\n|$)/)
@@ -97,12 +100,29 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
     // Extract scenes
     const scenesMatch = content.match(/Scene Outlines:([\s\S]*)$/)
 
-    const scenes = scenesMatch
-      ? scenesMatch[1]
-          .split('\n')
-          .filter(line => line.trim().match(/^\d+:/))
-          .map(line => line.replace(/^\d+:\s*/, '').trim())
-      : []
+    const scenesText = scenesMatch ? scenesMatch[1].trim().split(/\n(?=\d+\.\s+\*\*)/) : []
+
+    const scenes: object[] = []
+
+    scenesText?.forEach(sceneText => {
+      const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
+
+      const match = sceneText.trim().match(sceneRegex)
+
+      if (match) {
+        const sceneTitle = match[1].trim() // e.g., "Scene One"
+        const sceneName = match[2].trim() // e.g., "The Pilot’s Cockpit"
+        const description = match[3].trim().replace(/\s+/g, ' ') // Clean whitespace
+
+        scenes.push({
+          title: sceneTitle,
+          name: sceneName,
+          description: description
+        })
+      }
+    })
+
+    console.log(scenes)
 
     return {
       logline,
