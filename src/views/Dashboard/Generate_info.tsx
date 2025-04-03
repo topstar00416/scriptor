@@ -63,7 +63,7 @@ const GenerateInfo = async (projectData: ProjectData, target: 'logline' | 'beatS
   const targetPrompts = {
     logline: 'Generate logline',
     beatSheet: 'Generate beat sheets',
-    scenes: 'Generate scene outlines',
+    scenes: 'You are a professional film scriptwriter. Based on the provided project details, write detailed outlines for 5 key scenes',
     all: 'Generate all values' // Using the existing full systemPrompt
   }
 
