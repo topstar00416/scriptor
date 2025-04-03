@@ -169,10 +169,10 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
               if (newBeatSheetError) throw newBeatSheetError
             }),
-            ...generatedContent.scenes.map(async scene => {
+            ...generatedContent.scenes.map(async (scene, index) => {
               const { error: newSceneError } = await supabase.from('Scene').insert({
                 project_id: newProject.id,
-                seq: scene.seq,
+                seq: index + 1,
                 name: scene.name,
                 description: scene.description
               })

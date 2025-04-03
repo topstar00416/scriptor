@@ -44,9 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(newSession)
           setUser(newSession?.user ?? null)
 
-          if (event === 'SIGNED_IN') {
+          if (event === 'SIGNED_IN' && window.location.pathname !== '/home') {
             router.push('/home')
-          } else if (event === 'SIGNED_OUT') {
+          } else if (event === 'SIGNED_OUT' && window.location.pathname !== '/') {
             router.push('/')
           }
         })
@@ -69,6 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) throw error
+
+      router.push('/home')
     } finally {
       setLoading(false)
     }
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut()
 
       if (error) throw error
+
       router.push('/')
     } finally {
       setLoading(false)
