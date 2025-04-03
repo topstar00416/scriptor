@@ -48,16 +48,8 @@ const ProjectManager = () => {
     const fetchProject = async () => {
       // Fetch both project and logline data
       const [projectResult, loglineResult] = await Promise.all([
-        supabase
-          .from('Project')
-          .select('*')
-          .eq('id', projectId)
-          .single(),
-        supabase
-          .from('Logline')
-          .select('description')
-          .eq('project_id', projectId)
-          .single()
+        supabase.from('Project').select('*').eq('id', projectId).single(),
+        supabase.from('Logline').select('description').eq('project_id', projectId).single()
       ])
 
       if (projectResult.error) {
@@ -75,7 +67,6 @@ const ProjectManager = () => {
 
     fetchProject()
   }, [projectId, supabase])
-  
 
   const handleLoglineChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setLogline(event.target.value)
@@ -85,9 +76,9 @@ const ProjectManager = () => {
     try {
       setIsLoading(true)
       const result = await GenerateInfo(projectData, 'logline')
-      
+
       setLogline(result.logline)
-      
+
       // Update in database
       const { error } = await supabase
         .from('Logline')
@@ -107,10 +98,7 @@ const ProjectManager = () => {
   const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { error } = await supabase
-      .from('Logline')
-      .update({ description: logline })
-      .eq('project_id', projectId)
+    const { error } = await supabase.from('Logline').update({ description: logline }).eq('project_id', projectId)
 
     if (error) {
       console.error('Error updating logline:', error)
@@ -126,29 +114,16 @@ const ProjectManager = () => {
         <form onSubmit={handleEdit}>
           <div className='flex flex-wrap items-center justify-between gap-4'>
             <div>
-              <Typography variant='h3'>
-                Project Overview
-              </Typography>
+              <Typography variant='h3'>Project Overview</Typography>
             </div>
           </div>
           <Divider />
           <Grid container spacing={2} className='mt-4'>
             <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label='Title'
-                name='title'
-                value={projectData.title}
-              />
+              <TextField fullWidth label='Title' name='title' value={projectData.title} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                select
-                label='Genre'
-                name='genre'
-                value={projectData.genre}
-              >
+              <TextField fullWidth select label='Genre' name='genre' value={projectData.genre}>
                 {genres.map(genre => (
                   <MenuItem key={genre} value={genre}>
                     {genre}
@@ -157,13 +132,7 @@ const ProjectManager = () => {
               </TextField>
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                select
-                label='Tone'
-                name='tone'
-                value={projectData.tone}
-              >
+              <TextField fullWidth select label='Tone' name='tone' value={projectData.tone}>
                 {tones.map(tone => (
                   <MenuItem key={tone} value={tone}>
                     {tone}
@@ -174,14 +143,7 @@ const ProjectManager = () => {
           </Grid>
           <Grid container spacing={2} className='mt-4'>
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label='Concept'
-                name='concept'
-                value={projectData.concept}
-              />
+              <TextField fullWidth multiline rows={4} label='Concept' name='concept' value={projectData.concept} />
             </Grid>
           </Grid>
           <Divider flexItem className='mt-4 mb-4' />
@@ -194,7 +156,7 @@ const ProjectManager = () => {
                 onClick={handleRegenerate}
                 variant='tonal'
                 color='primary'
-                startIcon={<i className='bx-magic-2' />}
+                startIcon={<i className='bx bx-refresh' />}
               >
                 Regenerate
               </Button>
@@ -202,10 +164,10 @@ const ProjectManager = () => {
                 type='submit'
                 variant='tonal'
                 color='primary'
-                startIcon={<i className='bx-magic-2' />}
+                startIcon={<i className='bx-edit' />}
                 className='ml-2'
               >
-                Edit
+                Save Changes
               </Button>
               <Button
                 variant='tonal'
@@ -230,9 +192,7 @@ const ProjectManager = () => {
                 onChange={handleLoglineChange}
                 disabled={isLoading}
                 InputProps={{
-                  endAdornment: isLoading && (
-                    <CircularProgress size={20} />
-                  )
+                  endAdornment: isLoading && <CircularProgress size={20} />
                 }}
               />
             </Grid>

@@ -12,7 +12,7 @@ interface ProjectData {
 interface GeneratedContent {
   logline: string
   beatSheet: { seq: number; description: string }[]
-  scenes: object[]
+  scenes: { seq: number; name: string; description: string }[]
 }
 
 const GenerateInfo = async (
@@ -43,7 +43,7 @@ const GenerateInfo = async (
     1. [Beat 1 description here]
     2. [Beat 2 description here]
     ...
-    - Scene Outlines:
+    - Scene Outlines:(at least 5)
     1. [Description of scene 1]
     2. [Description of scene 2]
     ...
@@ -52,20 +52,12 @@ const GenerateInfo = async (
     - Ensure the content is cohesive and accurately reflects the provided tone, genre, and concept.
     - Maintain a formal tone throughout the response.
     - Focus on creating engaging and creative content suitable for further film script development.
-
-    ## User Input Example
-    - Title: "The Last Journey"
-    - Genre: Sci-Fi
-    - Tone: Formal
-    - Concept: A group of explorers travels to a distant planet, uncovering secrets that could change humanity forever.
-    - User Request: "Generate all values" or "Generate beat sheets" or "Generate scene outlines"
   `
 
   const targetPrompts = {
     logline: 'Generate logline',
     beatSheet: 'Generate beat sheets',
-    scenes:
-      'You are a professional film scriptwriter. Based on the provided project details, write detailed outlines for 5 key scenes',
+    scenes: 'Generate scene outlines',
     all: 'Generate all values' // Using the existing full systemPrompt
   }
 
@@ -82,6 +74,8 @@ const GenerateInfo = async (
     })
 
     const content = response.choices[0]?.message?.content || ''
+
+    console.log(content)
 
     // Extract logline
     const loglineMatch = content.match(/Logline: (.*?)(?=\n|$)/)
@@ -112,25 +106,21 @@ const GenerateInfo = async (
 
     const scenesText = scenesMatch ? scenesMatch[1].trim().split(/\n(?=\d+\.\s+\*\*)/) : []
 
-    const scenes: object[] = []
+    const scenes = scenesText
+      ?.map((sceneText, index) => {
+        const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
+        const match = sceneText.trim().match(sceneRegex)
 
-    scenesText?.forEach(sceneText => {
-      const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
-
-      const match = sceneText.trim().match(sceneRegex)
-
-      if (match) {
-        const sceneTitle = match[1].trim() // e.g., "Scene One"
-        const sceneName = match[2].trim() // e.g., "The Pilot's Cockpit"
-        const description = match[3].trim().replace(/\s+/g, ' ') // Clean whitespace
-
-        scenes.push({
-          title: sceneTitle,
-          name: sceneName,
-          description: description
-        })
-      }
-    })
+        if (match) {
+          return {
+            seq: index + 1,
+            name: `${match[1].trim()}: ${match[2].trim()}`,
+            description: match[3].trim().replace(/\s+/g, ' ')
+          }
+        }
+        return null
+      })
+      .filter(scene => scene !== null)
 
     return {
       logline,

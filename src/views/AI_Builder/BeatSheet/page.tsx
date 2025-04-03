@@ -108,7 +108,7 @@ const ProjectManager = () => {
     event.preventDefault()
 
     try {
-      // Update each beat individually
+      setIsLoading(true)
       await Promise.all(
         beatSheet.map(async beat => {
           const { error } = await supabase
@@ -125,6 +125,8 @@ const ProjectManager = () => {
     } catch (error) {
       console.error('Error updating beat sheet:', error)
       swal('Error', 'Failed to update beat sheet', 'error')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -154,7 +156,7 @@ const ProjectManager = () => {
                   variant='tonal'
                   color='primary'
                   type='button'
-                  startIcon={<i className='bx-magic-2' />}
+                  startIcon={<i className='bx bx-refresh' />}
                   disabled={isLoading}
                 >
                   Regenerate
@@ -189,7 +191,6 @@ const ProjectManager = () => {
               )}
               <Grid container spacing={2} className='mt-4'>
                 {sortedBeatSheet.map((beat, index) => {
-                  console.log(sortedBeatSheet)
                   return (
                     <Grid item xs={12} key={index}>
                       <TextField
