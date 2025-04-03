@@ -145,12 +145,14 @@ const ProjectManager = () => {
       return prevScenes.map(scene => {
         if (scene.seq === seq) {
           const [name, ...descriptionParts] = value.split('\n')
+
           return {
             ...scene,
             name: name.replace(':', '').trim(),
             description: descriptionParts.join('\n').trim()
           }
         }
+
         return scene
       })
     })

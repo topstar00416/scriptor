@@ -90,12 +90,14 @@ const GenerateInfo = async (
           .filter(line => line.trim().match(/^\d+\./))
           .map(line => {
             const match = line.trim().match(/^(\d+)\.\s*(.*)$/)
+
             if (match) {
               return {
                 seq: parseInt(match[1], 10),
                 description: match[2].trim()
               }
             }
+
             return null
           })
           .filter(item => item !== null)
@@ -118,6 +120,7 @@ const GenerateInfo = async (
             description: match[3].trim().replace(/\s+/g, ' ')
           }
         }
+
         return null
       })
       .filter(scene => scene !== null)

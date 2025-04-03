@@ -201,7 +201,6 @@ const ProjectManager = () => {
                         name={`beat_${beat.seq}`}
                         value={beat.description}
                         onChange={e => handleChange(beat.seq, e.target.value)}
-                        // disabled={isLoading}
                       />
                     </Grid>
                   )
