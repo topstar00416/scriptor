@@ -110,7 +110,7 @@ const GenerateInfo = async (
 
     const scenes = scenesText
       ?.map((sceneText, index) => {
-        const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
+        const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
         const match = sceneText.trim().match(sceneRegex)
 
         if (match) {
