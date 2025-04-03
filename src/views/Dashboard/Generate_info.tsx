@@ -116,6 +116,7 @@ const GenerateInfo = async (
       .map((sceneText, index) => {
         const regex = /^\d+\.\s+\*\*(.*?)\*\*:\s*(.+)$/s
         const match = sceneText.trim().match(regex)
+
         if (match) {
           return {
             seq: index + 1,
@@ -123,6 +124,7 @@ const GenerateInfo = async (
             description: match[2].replace(/\n/g, ' ').trim()
           }
         }
+
         return null
       })
       .filter(scene => scene !== null)
