@@ -40,10 +40,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       // Get total count
-      const { count } = await supabase
-        .from('Project')
-        .select('*', { count: 'exact', head: true })
-      
+      const { count } = await supabase.from('Project').select('*', { count: 'exact', head: true })
+
       if (count !== null) {
         setTotalProjects(count)
       }
@@ -82,6 +80,13 @@ const Dashboard = () => {
           icon: 'info',
           closeOnClickOutside: false
         })
+
+        // Delete all related data first
+        await Promise.all([
+          supabase.from('Logline').delete().eq('project_id', projectId),
+          supabase.from('Scene').delete().eq('project_id', projectId),
+          supabase.from('BeatSheet').delete().eq('project_id', projectId)
+        ])
 
         const { error } = await supabase.from('Project').delete().eq('id', projectId)
 
@@ -130,10 +135,7 @@ const Dashboard = () => {
         <Grid container spacing={2} className='mt-4'>
           {projects.map(project => (
             <Grid item xs={12} md={4} key={project.id}>
-              <div
-                className='border rounded bs-full h-[600px] flex flex-col'
-                style={{ cursor: 'pointer' }}
-              >
+              <div className='border rounded bs-full h-[600px] flex flex-col' style={{ cursor: 'pointer' }}>
                 <div className='pli-2 pbs-2 border-radius-10 h-[250px]'>
                   <img
                     src={project.imageUrl}

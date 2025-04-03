@@ -37,22 +37,15 @@ const ProjectManager = () => {
     concept: ''
   })
 
-  const [beatSheet, setBeatSheet] = useState<string[]>([])
+  const [beatSheet, setBeatSheet] = useState<{ seq: number; description: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       // Fetch both project and beat sheet data
       const [projectResult, beatSheetResult] = await Promise.all([
-        supabase
-          .from('Project')
-          .select('*')
-          .eq('id', projectId)
-          .single(),
-        supabase
-          .from('BeatSheet')
-          .select('description')
-          .eq('project_id', projectId)
+        supabase.from('Project').select('*').eq('id', projectId).single(),
+        supabase.from('BeatSheet').select('seq, description').eq('project_id', projectId)
       ])
 
       if (projectResult.error) {
@@ -65,7 +58,10 @@ const ProjectManager = () => {
         console.error('Error fetching beat sheet:', beatSheetResult.error)
       } else {
         // Map the descriptions to an array
-        const beats = beatSheetResult.data.map(item => item.description)
+        const beats = beatSheetResult.data.map(item => ({
+          seq: item.seq,
+          description: item.description
+        }))
 
         setBeatSheet(beats)
       }
@@ -80,24 +76,20 @@ const ProjectManager = () => {
       const result = await GenerateInfo(projectData, 'beatSheet')
 
       setBeatSheet(result.beatSheet)
-      
+
       // First delete existing beats
-      const { error: deleteError } = await supabase
-        .from('BeatSheet')
-        .delete()
-        .eq('project_id', projectId)
+      const { error: deleteError } = await supabase.from('BeatSheet').delete().eq('project_id', projectId)
 
       if (deleteError) throw deleteError
 
       // Then insert new beats
       await Promise.all(
-        result.beatSheet.map(async (beat) => {
-          const { error: insertError } = await supabase
-            .from('BeatSheet')
-            .insert({
-              project_id: projectId,
-              description: beat
-            })
+        result.beatSheet.map(async beat => {
+          const { error: insertError } = await supabase.from('BeatSheet').insert({
+            project_id: projectId,
+            seq: beat.seq,
+            description: beat.description
+          })
 
           if (insertError) throw insertError
         })
@@ -115,35 +107,38 @@ const ProjectManager = () => {
   const handleEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { error } = await supabase
-      .from('BeatSheet')
-      .update({ description: beatSheet })
-      .eq('project_id', projectId)
+    try {
+      setIsLoading(true)
+      await Promise.all(
+        beatSheet.map(async beat => {
+          const { error } = await supabase
+            .from('BeatSheet')
+            .update({ description: beat.description })
+            .eq('project_id', projectId)
+            .eq('seq', beat.seq)
 
-    if (error) {
+          if (error) throw error
+        })
+      )
+
+      swal('Success', 'Beat sheet updated successfully', 'success')
+    } catch (error) {
       console.error('Error updating beat sheet:', error)
       swal('Error', 'Failed to update beat sheet', 'error')
-    } else {
-      swal('Success', 'Beat sheet updated successfully', 'success')
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleChange = (index: number, value: string) => {
+  const handleChange = (seq: number, value: string) => {
     setBeatSheet(prevBeatSheet => {
-      const updatedBeatSheet = [...prevBeatSheet]
-      
-      updatedBeatSheet[index] = value
-
-      return updatedBeatSheet
+      return prevBeatSheet.map(beat => (beat.seq === seq ? { ...beat, description: value } : beat))
     })
   }
 
   // Sort the beatSheet array
   const sortedBeatSheet = [...beatSheet].sort((a, b) => {
-    const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10)
-    const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10)
-
-    return numA - numB
+    return a.seq - b.seq
   })
 
   return (
@@ -153,9 +148,7 @@ const ProjectManager = () => {
           <form onSubmit={handleEdit}>
             <div className='flex flex-wrap items-center justify-between gap-4'>
               <div>
-                <Typography variant='h3'>
-                  Beat Sheet
-                </Typography>
+                <Typography variant='h3'>Beat Sheet</Typography>
               </div>
               <div className='flex'>
                 <Button
@@ -163,20 +156,21 @@ const ProjectManager = () => {
                   variant='tonal'
                   color='primary'
                   type='button'
-                  startIcon={<i className='bx-magic-2' />}
+                  startIcon={<i className='bx bx-refresh' />}
                   disabled={isLoading}
                 >
                   Regenerate
                 </Button>
-                {/* <Button
+                <Button
                   type='submit'
                   variant='tonal'
                   color='primary'
-                  startIcon={<i className='bx-magic-2' />}
+                  startIcon={<i className='bx-edit' />}
                   className='ml-2'
+                  disabled={isLoading}
                 >
-                  Edit
-                </Button> */}
+                  Save Changes
+                </Button>
                 <Button
                   variant='tonal'
                   color='error'
@@ -196,20 +190,21 @@ const ProjectManager = () => {
                 </div>
               )}
               <Grid container spacing={2} className='mt-4'>
-                {sortedBeatSheet.map((beat, index) => (
-                  <Grid item xs={12} key={index}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={4}
-                      label={`Beat ${index + 1}`}
-                      name={`beat_${index + 1}`}
-                      value={beat}
-                      onChange={(e) => handleChange(index, e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </Grid>
-                ))}
+                {sortedBeatSheet.map((beat, index) => {
+                  return (
+                    <Grid item xs={12} key={index}>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={4}
+                        label={`Beat ${beat.seq}`}
+                        name={`beat_${beat.seq}`}
+                        value={beat.description}
+                        onChange={e => handleChange(beat.seq, e.target.value)}
+                      />
+                    </Grid>
+                  )
+                })}
               </Grid>
             </div>
           </form>

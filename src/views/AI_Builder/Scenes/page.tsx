@@ -23,6 +23,12 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { createClient } from '@configs/supabase'
 import GenerateInfo from '@views/Dashboard/Generate_info'
 
+interface Scene {
+  seq: number
+  name: string
+  description: string
+}
+
 const ProjectManager = () => {
   const router = useRouter()
   const supabase = createClient()
@@ -37,22 +43,14 @@ const ProjectManager = () => {
     concept: ''
   })
 
-  const [scenes, setScenes] = useState<string[]>([])
+  const [scenes, setScenes] = useState<Scene[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch both project and scenes data
       const [projectResult, scenesResult] = await Promise.all([
-        supabase
-          .from('Project')
-          .select('*')
-          .eq('id', projectId)
-          .single(),
-        supabase
-          .from('Scene')
-          .select('description')
-          .eq('project_id', projectId)
+        supabase.from('Project').select('*').eq('id', projectId).single(),
+        supabase.from('Scene').select('seq, name, description').eq('project_id', projectId)
       ])
 
       if (projectResult.error) {
@@ -64,10 +62,7 @@ const ProjectManager = () => {
       if (scenesResult.error) {
         console.error('Error fetching scenes:', scenesResult.error)
       } else {
-        // Map the descriptions to an array
-        const scenesList = scenesResult.data.map(item => item.description)
-
-        setScenes(scenesList)
+        setScenes(scenesResult.data)
       }
     }
 
@@ -79,30 +74,34 @@ const ProjectManager = () => {
       setIsLoading(true)
       const result = await GenerateInfo(projectData, 'scenes')
 
-      setScenes(result.scenes)
-      
       // First delete existing scenes
-      const { error: deleteError } = await supabase
-        .from('Scene')
-        .delete()
-        .eq('project_id', projectId)
+      const { error: deleteError } = await supabase.from('Scene').delete().eq('project_id', projectId)
 
       if (deleteError) throw deleteError
 
+      // Format scenes with sequence numbers
+      const newScenes = result.scenes.map((scene, index) => ({
+        seq: index + 1,
+        name: scene.name,
+        description: scene.description
+      }))
+
       // Then insert new scenes
       await Promise.all(
-        result.scenes.map(async (scene) => {
-          const { error: insertError } = await supabase
-            .from('Scene')
-            .insert({
-              project_id: projectId,
-              description: scene
-            })
+        newScenes.map(async scene => {
+          const { error: insertError } = await supabase.from('Scene').insert({
+            project_id: projectId,
+            seq: scene.seq,
+            name: scene.name,
+            description: scene.description
+          })
 
           if (insertError) throw insertError
         })
       )
 
+      // Only set state after successful database operation
+      setScenes(newScenes)
       swal('Success', 'Scenes regenerated successfully', 'success')
     } catch (error) {
       console.error('Error regenerating scenes:', error)
@@ -116,63 +115,82 @@ const ProjectManager = () => {
     event.preventDefault()
 
     try {
-      const { error } = await supabase
-        .from('Scene')
-        .update({ description: scenes })
-        .eq('project_id', projectId)
+      setIsLoading(true)
+      await Promise.all(
+        scenes.map(async scene => {
+          const { error } = await supabase
+            .from('Scene')
+            .update({
+              name: scene.name,
+              description: scene.description
+            })
+            .eq('project_id', projectId)
+            .eq('seq', scene.seq)
 
-      if (error) {
-        console.error('Error updating scenes:', error)
-        swal('Error', 'Failed to update scenes', 'error')
-      } else {
-        swal('Success', 'Scenes updated successfully', 'success')
-      }
+          if (error) throw error
+        })
+      )
+
+      swal('Success', 'Scenes updated successfully', 'success')
     } catch (error) {
       console.error('Error updating scenes:', error)
       swal('Error', 'Failed to update scenes', 'error')
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleChange = (index: number, value: string) => {
+  const handleChange = (seq: number, value: string) => {
     setScenes(prevScenes => {
-      const updatedScenes = [...prevScenes]
-      
-      updatedScenes[index] = value
+      return prevScenes.map(scene => {
+        if (scene.seq === seq) {
+          const [name, ...descriptionParts] = value.split('\n')
 
-      return updatedScenes
+          return {
+            ...scene,
+            name: name.replace(':', '').trim(),
+            description: descriptionParts.join('\n').trim()
+          }
+        }
+
+        return scene
+      })
     })
   }
+
+  // Sort the scenes array
+  const sortedScenes = [...scenes].sort((a, b) => a.seq - b.seq)
 
   return (
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
         <CardContent className='flex flex-col gap-6 h-full'>
-        <form onSubmit={handleEdit}>
+          <form onSubmit={handleEdit}>
             <div className='flex flex-wrap items-center justify-between gap-4'>
               <div>
-                <Typography variant='h3'>
-                  Scenes
-                </Typography>
+                <Typography variant='h3'>Scenes</Typography>
               </div>
               <div className='flex'>
                 <Button
                   onClick={handleRegenerate}
                   variant='tonal'
                   color='primary'
-                  startIcon={<i className='bx-magic-2' />}
+                  type='button'
+                  startIcon={<i className='bx bx-refresh' />}
                   disabled={isLoading}
                 >
                   Regenerate
                 </Button>
-                {/* <Button
+                <Button
                   type='submit'
                   variant='tonal'
                   color='primary'
-                  startIcon={<i className='bx-magic-2' />}
+                  startIcon={<i className='bx-edit' />}
                   className='ml-2'
+                  disabled={isLoading}
                 >
-                  Edit
-                </Button> */}
+                  Save Changes
+                </Button>
                 <Button
                   variant='tonal'
                   color='error'
@@ -192,17 +210,16 @@ const ProjectManager = () => {
                 </div>
               )}
               <Grid container spacing={2} className='mt-4'>
-                {scenes.map((scene, index) => (
-                  <Grid item xs={12} key={index}>
+                {sortedScenes.map(scene => (
+                  <Grid item xs={12} key={scene.seq}>
                     <TextField
                       fullWidth
                       multiline
                       rows={4}
-                      label={`Scene ${index + 1}`}
-                      name={`scene_${index + 1}`}
-                      value={scene}
-                      disabled={isLoading}
-                      onChange={(e) => handleChange(index, e.target.value)}
+                      label={`Scene ${scene.seq}`}
+                      name={`scene_${scene.seq}`}
+                      value={`${scene.name}:\n${scene.description}`}
+                      onChange={e => handleChange(scene.seq, e.target.value)}
                     />
                   </Grid>
                 ))}

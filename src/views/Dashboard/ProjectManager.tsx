@@ -35,8 +35,8 @@ interface ProjectManagerProps {
 
 interface GeneratedContent {
   logline: string
-  beatSheet: string[]
-  scenes: string[]
+  beatSheet: { seq: number; description: string }[]
+  scenes: object[]
 }
 
 const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
@@ -105,8 +105,8 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
     e.preventDefault()
 
     const willCreate = await swal({
-      title: mode === 'edit' ? 'Update Project?' : 'Create Project',
-      text: `Are you sure you want to ${mode === 'edit' ? 'update' : 'create'} this project?`,
+      title: 'Create Project',
+      text: `Are you sure you want to create this project?`,
       icon: 'warning',
       buttons: ['Cancel', 'Yes'],
       dangerMode: true
@@ -117,7 +117,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
         setIsLoading(true)
 
         swal({
-          title: mode === 'edit' ? 'Updating project...' : 'Creating project...',
+          title: 'Creating project...',
           text: 'Please wait...',
           icon: 'info',
           closeOnClickOutside: false
@@ -142,18 +142,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
           imageUrl
         }
 
-        if (mode === 'edit') {
-          const { error } = await supabase.from('Project').update(submitData).eq('id', projectId)
-
-          if (error) throw error
-
-          await swal({
-            title: 'Success!',
-            text: 'Project updated successfully',
-            icon: 'success'
-          })
-          router.push('/home')
-        } else if (mode === 'create') {
+        if (mode === 'create') {
           const { data: newProject, error } = await supabase.from('Project').insert(submitData).select().single()
 
           if (error) throw error
@@ -166,25 +155,28 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
 
           const generatedContent = await GenerateInfo(submitData, 'all')
 
-          console.log(generatedContent)
-
           setGeneratedContent(generatedContent)
 
+          console.log(generatedContent.beatSheet)
+
           await Promise.all([
-            ...generatedContent.beatSheet.map(async item => {
+            ...generatedContent.beatSheet.map(async beat => {
               const { error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
                 project_id: newProject.id,
-                description: item
+                seq: beat.seq,
+                description: beat.description
               })
 
               if (newBeatSheetError) throw newBeatSheetError
             }),
-            ...generatedContent.scenes.map(async item => {
+            ...generatedContent.scenes.map(async scene => {
               const { error: newSceneError } = await supabase.from('Scene').insert({
                 project_id: newProject.id,
-                description: item
+                seq: scene.seq,
+                name: scene.name,
+                description: scene.description
               })
-              
+
               if (newSceneError) throw newSceneError
             })
           ])
