@@ -15,6 +15,8 @@ interface GeneratedContent {
   scenes: { seq: number; name: string; description: string }[]
 }
 
+let flag = false
+
 const GenerateInfo = async (
   projectData: ProjectData,
   target: 'logline' | 'beatSheet' | 'scenes' | 'all'
@@ -106,11 +108,17 @@ const GenerateInfo = async (
 
     const scenesText = scenesMatch ? scenesMatch[1].trim().split(/\n(?=\d+\.\s+\*\*)/) : []
 
-    console.log(scenesText)
+    let sceneRegex: RegExp
+
+    if (flag) {
+      sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
+    } else {
+      sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
+      flag = true
+    }
 
     const scenes = scenesText
       ?.map((sceneText, index) => {
-        const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
         const match = sceneText.trim().match(sceneRegex)
 
         if (match) {
