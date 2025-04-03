@@ -123,6 +123,8 @@ const GenerateInfo = async (
 
         const match = sceneText.trim().match(sceneRegex)
 
+        console.log(match)
+
         if (match) {
           return {
             seq: index + 1,
@@ -134,8 +136,6 @@ const GenerateInfo = async (
         return null
       })
       .filter(scene => scene !== null)
-
-    console.log(scenes)
 
     return {
       logline,
