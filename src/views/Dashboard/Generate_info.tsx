@@ -46,8 +46,8 @@ const GenerateInfo = async (
     2. [Beat 2 description here]
     ...
     - Scene Outlines:(at least 5)
-    1. [Description of scene 1]
-    2. [Description of scene 2]
+    1. [Scene 1 Name]: [Scene 1 Description]
+    2. [Scene 2 Name]: [Scene 2 Description]
     ...
 
     ## Notes
@@ -104,38 +104,30 @@ const GenerateInfo = async (
       : []
 
     // Extract scenes
-    const scenesMatch = content.match(/Scene Outlines:([\s\S]*)$/)
+    const scenesMatch = content.match(/- Scene Outlines:\s*([\s\S]*)$/)
 
-    const scenesText = scenesMatch ? scenesMatch[1].trim().split(/\n(?=\d+\.\s+\*\*)/) : []
+    console.log('scenesMatch', scenesMatch)
 
-    // let sceneRegex: RegExp
+    const scenesText = scenesMatch ? scenesMatch[1].trim().split(/\n\s*\n/) : []
 
-    // if (flag) {
-    //   sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
-    // } else {
-    //   sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*\n([\s\S]*)$/
-    //   flag = true
-    // }
+    console.log('scenesText', scenesText)
 
     const scenes = scenesText
-      ?.map((sceneText, index) => {
-        const sceneRegex = /^\d+\.\s+\*\*(.+?):\s*(.+?)\*\*\s*-\s*(.*)$/
-
-        const match = sceneText.trim().match(sceneRegex)
-
-        console.log(match)
-
+      .map((sceneText, index) => {
+        const regex = /^\d+\.\s+\*\*(.*?)\*\*:\s*(.+)$/s
+        const match = sceneText.trim().match(regex)
         if (match) {
           return {
             seq: index + 1,
-            name: `${match[1].trim()}: ${match[2].trim()}`,
-            description: match[3].trim().replace(/\s+/g, ' ')
+            name: match[1].trim(),
+            description: match[2].replace(/\n/g, ' ').trim()
           }
         }
-
         return null
       })
       .filter(scene => scene !== null)
+
+    console.log(scenes)
 
     return {
       logline,
