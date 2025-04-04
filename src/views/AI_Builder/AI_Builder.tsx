@@ -15,7 +15,6 @@ import CustomTabList from '@core/components/mui/TabList'
 import Overview from './Overview/page'
 import BeatSheet from './BeatSheet/page'
 import Scenes from './Scenes/page'
-import Rewrite from './Rewrite/page'
 
 const AccountSettings = () => {
   // States
@@ -34,7 +33,6 @@ const AccountSettings = () => {
             <Tab label='Overview' icon={<i className='bx-grid-alt' />} iconPosition='start' value='overview' />
             <Tab label='Beat Sheet' icon={<i className='bx-list-ul' />} iconPosition='start' value='beat_sheet' />
             <Tab label='Scenes' icon={<i className='bx-movie-play' />} iconPosition='start' value='scenes' />
-            <Tab label='Rewrite Tool' icon={<i className='bx-edit-alt' />} iconPosition='start' value='rewrite' />
           </CustomTabList>
         </Grid>
         <Grid item xs={12}>
@@ -42,7 +40,6 @@ const AccountSettings = () => {
             {activeTab === 'overview' && <Overview />}
             {activeTab === 'beat_sheet' && <BeatSheet />}
             {activeTab === 'scenes' && <Scenes />}
-            {activeTab === 'rewrite' && <Rewrite />}
           </TabPanel>
         </Grid>
       </Grid>
