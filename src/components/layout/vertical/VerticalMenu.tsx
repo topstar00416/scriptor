@@ -60,6 +60,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/home' icon={<i className='bx-home-smile' />}>
           Dashboard
         </MenuItem>
+        <MenuItem href='/rewrite' icon={<i className='bx-edit' />}>
+          Rewrite Tool
+        </MenuItem>
       </Menu>
     </ScrollWrapper>
   )
