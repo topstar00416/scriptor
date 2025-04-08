@@ -8,6 +8,7 @@ import { useRouter, useParams } from 'next/navigation'
 
 // External Imports
 import swal from 'sweetalert'
+import jsPDF from 'jspdf'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -161,6 +162,81 @@ const ProjectManager = () => {
   // Sort the scenes array
   const sortedScenes = [...scenes].sort((a, b) => a.seq - b.seq)
 
+  const handleExportPDF = () => {
+    try {
+      setIsLoading(true)
+
+      // Create a new jsPDF instance
+      const doc = new jsPDF()
+
+      // Set initial position
+      let yPos = 20
+
+      // Set default font
+      doc.setFont('helvetica')
+      doc.setFontSize(18)
+
+      // Add title (centered)
+      doc.text(`Scene List: ${projectData.title}`, 105, yPos, { align: 'center' })
+      yPos += 15
+
+      // Add project info with proper multi-line handling
+      doc.setFontSize(12)
+
+      // Handle multi-line concept text
+      const conceptLines = doc.splitTextToSize(`Concept: ${projectData.concept}`, 180)
+
+      // Genre and tone (single line)
+      doc.text(`Genre: ${projectData.genre}`, 14, yPos)
+      yPos += 8
+      doc.text(`Tone: ${projectData.tone}`, 14, yPos)
+      yPos += 8
+
+      // Concept (multi-line)
+      doc.text(conceptLines, 14, yPos)
+      yPos += conceptLines.length * 7 + 7 // Adjust spacing based on number of lines
+
+      // Add scenes header
+      doc.setFontSize(14)
+      doc.text('Scenes:', 14, yPos)
+      yPos += 10
+
+      // Process each scene
+      doc.setFontSize(12)
+
+      sortedScenes.forEach(scene => {
+        // Add scene number and name (bold)
+        doc.setFont('helvetica', 'bold')
+        const sceneTitle = `Scene ${scene.seq}: ${scene.name}`
+
+        doc.text(sceneTitle, 14, yPos)
+
+        // Add scene description (normal) with multi-line support
+        doc.setFont('helvetica', 'normal')
+        const descriptionLines = doc.splitTextToSize(scene.description, 180)
+
+        doc.text(descriptionLines, 20, yPos + 7)
+
+        // Move position down based on number of lines
+        yPos += Math.max(descriptionLines.length * 7, 15) + 10 // Ensure minimum spacing
+
+        // Add new page if we're near the bottom
+        if (yPos > 260) {
+          doc.addPage()
+          yPos = 20
+        }
+      })
+
+      // Save the PDF
+      doc.save(`Scenes_${projectData.title.replace(/\s+/g, '_')}.pdf`)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      swal('Error', 'Failed to generate PDF', 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
@@ -190,6 +266,16 @@ const ProjectManager = () => {
                   disabled={isLoading}
                 >
                   Save Changes
+                </Button>
+                <Button
+                  onClick={handleExportPDF}
+                  variant='tonal'
+                  color='secondary'
+                  startIcon={<i className='bx bx-download' />}
+                  className='ml-2'
+                  disabled={isLoading}
+                >
+                  Export PDF
                 </Button>
                 <Button
                   variant='tonal'
