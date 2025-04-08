@@ -8,6 +8,7 @@ import { useRouter, useParams } from 'next/navigation'
 
 // External Imports
 import swal from 'sweetalert'
+import { jsPDF } from 'jspdf'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -141,6 +142,96 @@ const ProjectManager = () => {
     return a.seq - b.seq
   })
 
+  const handleExportPDF = () => {
+    try {
+      setIsLoading(true)
+
+      // Create a new jsPDF instance with landscape orientation if needed
+      const doc = new jsPDF()
+
+      // Set margins and initial position
+      const leftMargin = 14
+      const maxWidth = 180 // 210 (A4 width) - leftMargin - rightMargin
+      let yPos = 20
+      const lineHeight = 7
+
+      // Set default font
+      doc.setFont('helvetica')
+      doc.setFontSize(18)
+
+      // Add title (centered)
+      doc.text(`Beat Sheet: ${projectData.title}`, 105, yPos, { align: 'center' })
+      yPos += 15
+
+      // Add project info with proper multi-line handling
+      doc.setFontSize(12)
+
+      // Genre (single line)
+      doc.text(`Genre: ${projectData.genre}`, leftMargin, yPos)
+      yPos += lineHeight
+
+      // Tone (single line)
+      doc.text(`Tone: ${projectData.tone}`, leftMargin, yPos)
+      yPos += lineHeight
+
+      // Concept (multi-line with proper wrapping)
+      const conceptLines = doc.splitTextToSize(`Concept: ${projectData.concept}`, maxWidth)
+
+      doc.text(conceptLines, leftMargin, yPos)
+      yPos += conceptLines.length * lineHeight + lineHeight // Extra space after concept
+
+      // Add beats header
+      doc.setFontSize(14)
+      doc.text('Beats:', leftMargin, yPos)
+      yPos += lineHeight
+
+      // Process each beat
+      doc.setFontSize(12)
+      sortedBeatSheet.forEach(beat => {
+        // Check if we need a new page before adding this beat
+        if (yPos > 260) {
+          doc.addPage()
+          yPos = 20
+        }
+
+        // Add beat number (bold)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`Beat ${beat.seq}:`, leftMargin, yPos)
+
+        // Add beat description (normal with multi-line support)
+        doc.setFont('helvetica', 'normal')
+        const descriptionLines = doc.splitTextToSize(beat.description, maxWidth)
+
+        // Calculate height needed for this beat
+        const beatHeight = descriptionLines.length * lineHeight
+
+        // If this beat would go past page end, add new page
+        if (yPos + beatHeight > 280) {
+          doc.addPage()
+          yPos = 20
+
+          // Re-add beat number on new page
+          doc.setFont('helvetica', 'bold')
+          doc.text(`Beat ${beat.seq}:`, leftMargin, yPos)
+          doc.setFont('helvetica', 'normal')
+        }
+
+        doc.text(descriptionLines, leftMargin + 10, yPos + lineHeight)
+        yPos += beatHeight + lineHeight * 1.5 // Space between beats
+      })
+
+      // Save the PDF with sanitized filename
+      const filename = `BeatSheet_${projectData.title.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`
+
+      doc.save(filename)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      swal('Error', 'Failed to generate PDF', 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className='relative w-full h-full'>
       <Card className='w-full h-full'>
@@ -170,6 +261,15 @@ const ProjectManager = () => {
                   disabled={isLoading}
                 >
                   Save Changes
+                </Button>
+                <Button
+                  onClick={handleExportPDF}
+                  variant='tonal'
+                  color='secondary'
+                  startIcon={<i className='bx bx-download' />}
+                  className='ml-2'
+                >
+                  Export PDF
                 </Button>
                 <Button
                   variant='tonal'
