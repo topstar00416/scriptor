@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server'
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 const PUBLIC_PATHS = ['/', '/home', '/login', '/register', '/auth/callback', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers
     }
@@ -53,13 +54,16 @@ export async function middleware(request: NextRequest) {
 
     if (!session && !isPublicPath) {
       const loginUrl = new URL('/login', request.url)
+
       loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+
       return NextResponse.redirect(loginUrl)
     }
 
     return response
   } catch (error) {
     console.error('Middleware error:', error)
+
     return NextResponse.redirect(new URL('/login', request.url))
   }
 }
