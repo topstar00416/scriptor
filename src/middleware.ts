@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
-const PUBLIC_PATHS = ['/', '/home', '/login', '/register', '/auth/callback', '/forgot-password', '/reset-password']
+const AUTH_ONLY_PATHS = ['/login', '/register', '/forgot-password', '/reset-password']
+const PUBLIC_PATHS = ['/', '/auth/callback', ...AUTH_ONLY_PATHS]
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    // Get session with debugging
+    // Get session
     const {
       data: { session },
       error
@@ -50,12 +51,21 @@ export async function middleware(request: NextRequest) {
       response.cookies.delete('sb-refresh-token')
     }
 
-    const isPublicPath = PUBLIC_PATHS.some(path => request.nextUrl.pathname.startsWith(path))
+    const currentPath = request.nextUrl.pathname
 
+    const isAuthOnlyPath = AUTH_ONLY_PATHS.some(path => currentPath.startsWith(path))
+    const isPublicPath = PUBLIC_PATHS.some(path => currentPath === path)
+
+    // If logged-in user visits auth-only pages (signup, login, forgot-password, etc.)
+    if (session && isAuthOnlyPath) {
+      return NextResponse.redirect(new URL('/home', request.url))
+    }
+
+    // If logged-out user visits protected pages (not public)
     if (!session && !isPublicPath) {
       const loginUrl = new URL('/login', request.url)
 
-      loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+      loginUrl.searchParams.set('redirect', currentPath)
 
       return NextResponse.redirect(loginUrl)
     }
