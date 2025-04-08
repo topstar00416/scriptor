@@ -1,19 +1,16 @@
 import { NextResponse, type NextRequest } from 'next/server'
-
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
-// List of public paths that don't require authentication
-const PUBLIC_PATHS = ['/', '/login', '/register', '/auth/callback', '/forgot-password', '/reset-password']
+const PUBLIC_PATHS = ['/', '/home', '/login', '/register', '/auth/callback', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({
+  let response = NextResponse.next({
     request: {
       headers: request.headers
     }
   })
 
   try {
-    // Create Supabase server client
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -34,62 +31,39 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    // Get session
+    // Get session with debugging
     const {
       data: { session },
       error
     } = await supabase.auth.getSession()
 
-    // Handle potential errors
+    console.log('Middleware session check:', {
+      path: request.nextUrl.pathname,
+      hasSession: !!session,
+      error: error?.message
+    })
 
     if (error) {
       console.error('Middleware auth error:', error)
-
-      // Clear invalid session
-      response.cookies.set({
-        name: 'sb-access-token',
-        value: '',
-        expires: new Date(0),
-        path: '/'
-      })
-      response.cookies.set({
-        name: 'sb-refresh-token',
-        value: '',
-        expires: new Date(0),
-        path: '/'
-      })
+      response.cookies.delete('sb-access-token')
+      response.cookies.delete('sb-refresh-token')
     }
 
     const isPublicPath = PUBLIC_PATHS.some(path => request.nextUrl.pathname.startsWith(path))
 
     if (!session && !isPublicPath) {
-      // Store the attempted URL for redirect after login
       const loginUrl = new URL('/login', request.url)
-
       loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
-
       return NextResponse.redirect(loginUrl)
     }
 
     return response
   } catch (error) {
     console.error('Middleware error:', error)
-
-    // Fallback response in case of error
-    return response
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api routes
-     * - public assets (images, fonts, etc.)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|assets|images|fonts).*)'
-  ]
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|assets|images|fonts).*)']
 }
