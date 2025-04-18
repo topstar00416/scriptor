@@ -188,7 +188,7 @@ const Dashboard = () => {
                       startIcon={<i className='bx-edit-alt' />}
                       onClick={e => {
                         e.stopPropagation()
-                        router.push(`/home/builder/${project.id}`)
+                        router.push(`/script/${project.id}`)
                       }}
                       className='is-auto flex-auto'
                       type='button'
