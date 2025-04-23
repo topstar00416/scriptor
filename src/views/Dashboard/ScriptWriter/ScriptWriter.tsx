@@ -460,14 +460,14 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
       const scriptContent = editor.getText()
 
       // Update the project in Supabase
-      await supabase
+      const { error } = await supabase
         .from('Project')
         .update({
           script: scriptContent
         })
         .eq('id', projectId)
 
-      // if (error) throw error
+      if (error) throw error
 
       setSaveStatus('saved')
 
@@ -476,8 +476,7 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
         title: 'Success!',
         text: 'Script saved successfully',
         icon: 'success',
-        timer: 1500,
-        buttons: [] as string[]
+        timer: 1500
       })
 
       // Reset save status after success message is closed
