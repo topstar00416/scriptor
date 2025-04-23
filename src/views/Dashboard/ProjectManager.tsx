@@ -32,12 +32,6 @@ interface ProjectManagerProps {
   projectId?: string
 }
 
-interface GeneratedContent {
-  logline: string
-  beatSheet: { seq: number; description: string }[]
-  scenes: object[]
-}
-
 const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
   const router = useRouter()
   const supabase = createClient()
