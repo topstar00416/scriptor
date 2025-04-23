@@ -460,7 +460,7 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
       const scriptContent = editor.getText()
 
       // Update the project in Supabase
-      const { error } = await supabase
+      await supabase
         .from('Project')
         .update({
           script: scriptContent,
