@@ -328,9 +328,10 @@ ${selectedText}
 Please provide an enhanced version that:
 1. Maintains the same basic structure and key story elements
 2. Incorporates the specified elements naturally
-3. Uses proper screenplay formatting
-4. Makes the scene more vivid and engaging
-5. Keeps the tone consistent with the provided requirements
+3. Makes the scene more vivid and engaging
+4. Keeps the tone consistent with the provided requirements
+
+You only upgrade the sentence with inputed information.
 
 Enhanced version:`
 }
