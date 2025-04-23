@@ -463,8 +463,7 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
       await supabase
         .from('Project')
         .update({
-          script: scriptContent,
-          updated_at: new Date().toISOString()
+          script: scriptContent
         })
         .eq('id', projectId)
 
