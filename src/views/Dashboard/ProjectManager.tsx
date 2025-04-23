@@ -23,7 +23,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 // Internal Imports
 import { createClient } from '@configs/supabase'
 import ImageUpload from './ImageUpload'
-import GenerateInfo from './Generate_info'
 
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
@@ -31,12 +30,6 @@ const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
 interface ProjectManagerProps {
   mode: 'create' | 'edit' | 'show'
   projectId?: string
-}
-
-interface GeneratedContent {
-  logline: string
-  beatSheet: { seq: number; description: string }[]
-  scenes: object[]
 }
 
 const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
@@ -49,12 +42,6 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
     tone: '',
     concept: '',
     imageUrl: ''
-  })
-
-  const [, setGeneratedContent] = useState<GeneratedContent>({
-    logline: '',
-    beatSheet: [],
-    scenes: []
   })
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -153,42 +140,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             icon: 'success'
           })
 
-          const generatedContent = await GenerateInfo(submitData, 'all')
-
-          setGeneratedContent(generatedContent)
-
-          console.log(generatedContent.scenes)
-
-          await Promise.all([
-            ...generatedContent.beatSheet.map(async beat => {
-              const { error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
-                project_id: newProject.id,
-                seq: beat.seq,
-                description: beat.description
-              })
-
-              if (newBeatSheetError) throw newBeatSheetError
-            }),
-            ...generatedContent.scenes.map(async (scene, index) => {
-              const { error: newSceneError } = await supabase.from('Scene').insert({
-                project_id: newProject.id,
-                seq: index + 1,
-                name: scene.name,
-                description: scene.description
-              })
-
-              if (newSceneError) throw newSceneError
-            })
-          ])
-
-          const { error: loglineError } = await supabase.from('Logline').insert({
-            project_id: newProject.id,
-            description: generatedContent.logline
-          })
-
-          if (loglineError) throw loglineError
-
-          router.push(`/home/builder/${newProject.id}`)
+          router.push(`/script/${newProject.id}`)
         }
       } catch (error) {
         console.error('Error:', error)

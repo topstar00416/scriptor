@@ -53,13 +53,15 @@ export async function middleware(request: NextRequest) {
 
     const currentPath = request.nextUrl.pathname
 
-    // const isAuthOnlyPath = AUTH_ONLY_PATHS.some(path => currentPath.startsWith(path))
+    const isAuthOnlyPath = AUTH_ONLY_PATHS.some(path => currentPath.startsWith(path))
     const isPublicPath = PUBLIC_PATHS.some(path => currentPath === path)
 
     // If logged-in user visits auth-only pages (signup, login, forgot-password, etc.)
-    // if (session && isAuthOnlyPath) {
-    //   return NextResponse.redirect(new URL('/home', request.url))
-    // }
+    if (session && isAuthOnlyPath) {
+      console.log('!!!!!!')
+
+      return NextResponse.redirect(new URL('/home', request.url))
+    }
 
     // If logged-out user visits protected pages (not public)
     if (!session && !isPublicPath) {

@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
@@ -33,6 +32,4 @@ export async function GET(request: Request) {
     // Exchange the code for a session
     await supabase.auth.exchangeCodeForSession(code)
   }
-
-  return NextResponse.redirect(new URL('/home', requestUrl.origin))
 }

@@ -1,4 +1,4 @@
-import ScriptWriter from '@/views/Dashboard/ScriptWriter'
+import ScriptWriter from '@/views/Dashboard/ScriptWriter/ScriptWriter'
 
 interface PageProps {
   params: {
