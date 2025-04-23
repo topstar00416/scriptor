@@ -153,42 +153,7 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
             icon: 'success'
           })
 
-          const generatedContent = await GenerateInfo(submitData, 'all')
-
-          setGeneratedContent(generatedContent)
-
-          console.log(generatedContent.scenes)
-
-          await Promise.all([
-            ...generatedContent.beatSheet.map(async beat => {
-              const { error: newBeatSheetError } = await supabase.from('BeatSheet').insert({
-                project_id: newProject.id,
-                seq: beat.seq,
-                description: beat.description
-              })
-
-              if (newBeatSheetError) throw newBeatSheetError
-            }),
-            ...generatedContent.scenes.map(async (scene, index) => {
-              const { error: newSceneError } = await supabase.from('Scene').insert({
-                project_id: newProject.id,
-                seq: index + 1,
-                name: scene.name,
-                description: scene.description
-              })
-
-              if (newSceneError) throw newSceneError
-            })
-          ])
-
-          const { error: loglineError } = await supabase.from('Logline').insert({
-            project_id: newProject.id,
-            description: generatedContent.logline
-          })
-
-          if (loglineError) throw loglineError
-
-          router.push(`/home/builder/${newProject.id}`)
+          router.push(`/script/${newProject.id}`)
         }
       } catch (error) {
         console.error('Error:', error)
