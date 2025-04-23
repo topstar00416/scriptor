@@ -33,6 +33,4 @@ export async function GET(request: Request) {
     // Exchange the code for a session
     await supabase.auth.exchangeCodeForSession(code)
   }
-
-  // return NextResponse.redirect(new URL('/home', requestUrl.origin))
 }

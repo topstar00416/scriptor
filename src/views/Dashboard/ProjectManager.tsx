@@ -23,7 +23,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 // Internal Imports
 import { createClient } from '@configs/supabase'
 import ImageUpload from './ImageUpload'
-import GenerateInfo from './Generate_info'
 
 const genres = ['Romance', 'Mystery', 'Sci-Fi', 'Drama', 'Comedy', 'Horror']
 const tones = ['Light', 'Dark', 'Humorous', 'Serious', 'Mysterious']
@@ -49,12 +48,6 @@ const ProjectManager = ({ mode, projectId }: ProjectManagerProps) => {
     tone: '',
     concept: '',
     imageUrl: ''
-  })
-
-  const [, setGeneratedContent] = useState<GeneratedContent>({
-    logline: '',
-    beatSheet: [],
-    scenes: []
   })
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
