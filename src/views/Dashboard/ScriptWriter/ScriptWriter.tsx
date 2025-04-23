@@ -437,17 +437,6 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
         if (error) throw error
 
         setProjectData(data)
-
-        // Fetch existing script if any
-        const { data: scriptData } = await supabase
-          .from('Script')
-          .select('content')
-          .eq('project_id', projectId)
-          .single()
-
-        if (scriptData) {
-          // Handle script data
-        }
       } catch (error) {
         console.error('Error fetching project:', error)
       } finally {
@@ -479,7 +468,7 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
         })
         .eq('id', projectId)
 
-      if (error) throw error
+      // if (error) throw error
 
       setSaveStatus('saved')
 

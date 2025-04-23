@@ -58,6 +58,7 @@ export async function middleware(request: NextRequest) {
 
     // If logged-in user visits auth-only pages (signup, login, forgot-password, etc.)
     if (session && isAuthOnlyPath) {
+      console.log('!!!!!!')
       return NextResponse.redirect(new URL('/home', request.url))
     }
 
