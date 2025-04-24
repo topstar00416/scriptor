@@ -313,25 +313,31 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 })
 
-const generatePrompt = (selectedText: string, customItems: CustomItem[]) => {
+const generatePrompt = (selectedText: string, customItems: CustomItem[], fullScript: string) => {
   const itemsDescription = customItems.map(item => `${item.label}: ${item.value}`).join('\n')
 
-  return `As an expert screenwriter, enhance the following script segment while maintaining its core meaning and incorporating these specific elements:
+  return `As an expert screenwriter, enhance the following script segment while maintaining its core meaning and incorporating these specific elements. Consider the full script context to ensure continuity and consistency.
 
-${itemsDescription}
+Full Script Context:
+"""
+${fullScript}
+"""
 
-Original script segment:
+Selected Segment to Upgrade:
 """
 ${selectedText}
 """
+
+Custom Elements to Incorporate:
+${itemsDescription}
 
 Please provide an enhanced version that:
 1. Maintains the same basic structure and key story elements
 2. Incorporates the specified elements naturally
 3. Makes the scene more vivid and engaging
 4. Keeps the tone consistent with the provided requirements
-
-You only upgrade the sentence with inputed information.
+5. Ensures continuity with the surrounding script context
+6. Preserves character voices and narrative style
 
 Enhanced version:`
 }
@@ -677,7 +683,9 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
         throw new Error('Please select text and add at least one custom item')
       }
 
-      const prompt = generatePrompt(selectedText.text, customItems)
+      const fullScript = editor?.getText() || ''
+
+      const prompt = generatePrompt(selectedText.text, customItems, fullScript)
 
       const completion = await openai.chat.completions.create({
         model: 'gpt-4',
@@ -685,7 +693,7 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
           {
             role: 'system',
             content:
-              'You are an expert screenwriter with deep knowledge of screenplay formatting and dramatic writing. Your task is to enhance script segments while maintaining their core meaning and incorporating specific elements requested by the writer.'
+              'You are an expert screenwriter with deep knowledge of screenplay formatting and dramatic writing. Your task is to enhance script segments while maintaining their core meaning and incorporating specific elements requested by the writer. Consider the full script context to ensure narrative continuity and consistency.'
           },
           {
             role: 'user',
