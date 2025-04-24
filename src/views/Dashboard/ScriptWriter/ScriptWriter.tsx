@@ -702,8 +702,11 @@ const EnhancedScriptWriter = ({ projectId }: EnhancedScriptWriterProps) => {
         throw new Error('Failed to generate enhanced content')
       }
 
-      // Clean up the content by removing triple quotes
-      const cleanedContent = enhancedContent.replace(/^"""|"""$/g, '').trim()
+      // Clean up the content by removing triple quotes and any surrounding quotes
+      const cleanedContent = enhancedContent
+        .replace(/^"""|"""$/g, '') // Remove triple quotes
+        .replace(/^"|"$/g, '') // Remove surrounding quotes
+        .trim()
 
       // Replace the selected text with the AI-generated content
       if (editor && selectedText?.range) {
