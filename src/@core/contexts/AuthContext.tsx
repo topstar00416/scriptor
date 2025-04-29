@@ -44,8 +44,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(newSession)
           setUser(newSession?.user ?? null)
 
-          if (event === 'SIGNED_IN' && window.location.pathname !== '/home') {
-            router.push('/home')
+          if (event === 'SIGNED_IN') {
+            const currentPath = window.location.pathname
+            const isAuthPath = ['/login', '/register', '/forgot-password', '/reset-password'].includes(currentPath)
+
+            if (isAuthPath) {
+              router.push('/home')
+            }
           } else if (event === 'SIGNED_OUT' && window.location.pathname !== '/') {
             router.push('/')
           }
@@ -70,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error
 
+      console.log('#######')
       router.push('/home')
     } finally {
       setLoading(false)
