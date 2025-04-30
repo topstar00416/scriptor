@@ -110,6 +110,10 @@ const Dashboard = () => {
     }
   }
 
+  const handleProjectClick = (projectId: string) => {
+    router.push(`/script/${projectId}`)
+  }
+
   return (
     <Card className='w-full h-full'>
       <CardContent className='flex flex-col gap-6'>
@@ -135,7 +139,11 @@ const Dashboard = () => {
         <Grid container spacing={2} className='mt-4'>
           {projects.map(project => (
             <Grid item xs={12} md={4} key={project.id}>
-              <div className='border rounded bs-full h-[600px] flex flex-col' style={{ cursor: 'pointer' }}>
+              <div 
+                className='border rounded bs-full h-[600px] flex flex-col' 
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleProjectClick(project.id)}
+              >
                 <div className='pli-2 pbs-2 border-radius-10 h-[250px]'>
                   <img
                     src={project.imageUrl}
@@ -209,7 +217,6 @@ const Dashboard = () => {
                       Delete
                     </Button>
                   </div>
-                  {/* )} */}
                 </div>
               </div>
             </Grid>
