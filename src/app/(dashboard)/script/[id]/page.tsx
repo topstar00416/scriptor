@@ -1,12 +1,6 @@
 import ScriptWriter from '@/views/ScriptWriter/ScriptWriter'
 
-interface PageProps {
-  params: {
-    id: string
-  }
-}
-
-const Page = ({ params }: PageProps) => {
+const Page = () => {
   return <ScriptWriter />
 }
 

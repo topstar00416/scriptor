@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+
 import Logo from '@/components/landing/logo'
 
 export default function Page() {
@@ -12,7 +12,7 @@ export default function Page() {
         <div className='absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-[#F5B638] rounded-full filter blur-[128px] opacity-20'></div>
         <div className='absolute bottom-[20%] right-[10%] w-[250px] h-[250px] bg-[#6366F1] rounded-full filter blur-[128px] opacity-10'></div>
       </div>
-      
+
       {/* Content */}
       <div className='relative z-10'>
         <header className='w-full bg-transparent/5 backdrop-blur-sm fixed top-0 z-50 border-b border-white/5'>
@@ -50,7 +50,8 @@ export default function Page() {
                   <span className='text-white'>Modern Filmmakers</span>
                 </h1>
                 <p className='text-white/80 text-lg max-w-xl leading-relaxed'>
-                  Transform your film ideas into professional screenplays with Scriptor. Generate beat sheets, formatted scenes, and script rewrites with AI assistance.
+                  Transform your film ideas into professional screenplays with Scriptor. Generate beat sheets, formatted
+                  scenes, and script rewrites with AI assistance.
                 </p>
                 <div className='flex gap-4 pt-4'>
                   <Link
@@ -89,19 +90,17 @@ export default function Page() {
                   <div className='text-xs text-gray-500 mb-4'>FADE IN:</div>
                   <div className='mb-4'>INT. HIGH-TECH OFFICE - DAY</div>
                   <div className='mb-6'>
-                    A sleek, minimalist workspace. ALEX (30s, determined) sits at a desk, surrounded by multiple monitors displaying screenplay drafts.
+                    A sleek, minimalist workspace. ALEX (30s, determined) sits at a desk, surrounded by multiple
+                    monitors displaying screenplay drafts.
                   </div>
                   <div className='mb-2'>ALEX</div>
                   <div className='mb-4 pl-8'>(frustrated)</div>
-                  <div className='mb-6 pl-8'>
-                    This scene just doesn't work. I've rewritten it ten times already...
-                  </div>
+                  <div className='mb-6 pl-8'>{`This scene just doesn't work. I've rewritten it ten times already...`}</div>
                   <div className='mb-4'>
-                    Alex sighs, then notices an app icon on the screen: "Scriptor". After a moment of consideration, Alex clicks it.
+                    {`Alex sighs, then notices an app icon on the screen: "Scriptor". After a moment of consideration,`}
+                    {`Alex clicks it.`}
                   </div>
-                  <div className='mb-4'>
-                    The screen transforms, AI tools coming to life.
-                  </div>
+                  <div className='mb-4'>The screen transforms, AI tools coming to life.</div>
                   <div className='text-[#F5B638] animate-pulse'>
                     Scriptor generating solutions...
                     <span className='inline-block animate-bounce ml-1'>|</span>
