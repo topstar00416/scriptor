@@ -431,6 +431,7 @@ const ScriptWriter = () => {
     }
 
     document.addEventListener('keydown', handleKeyDown)
+
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [content, undoStack, redoStack]) // Add dependencies
 
