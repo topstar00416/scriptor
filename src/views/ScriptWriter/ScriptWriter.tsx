@@ -36,11 +36,48 @@ const openai = new OpenAI({
 
 // Menu Items Configuration
 const menuItems = {
-  file: ['New', 'Open', 'Save', 'Save As', 'Export', 'Print', 'Print Preview'],
-  edit: ['Undo', 'Redo', 'Cut', 'Copy', 'Paste', 'Select All', 'Find', 'Replace'],
-  view: ['Full Screen', 'Page Width', 'Show Ruler', 'Show Grid', 'Zoom In', 'Zoom Out', 'Actual Size'],
-  insert: ['Page Break', 'Table', 'Picture', 'Link', 'Comment', 'Header', 'Footer'],
-  format: ['Font', 'Paragraph', 'Styles', 'Columns', 'Page Setup']
+  file: [
+    'Import Script',
+    'Export Script',
+    'Rename Project',
+    'Create Link',
+    'Create Sides',
+    'Request Approval',
+    'History',
+    'Print/Download PDF',
+    'Save as Draft'
+  ],
+  edit: [
+    'Line Format',
+    'Scene Numbers',
+    'Format',
+    'Title Page',
+    'Cut',
+    'Copy',
+    'Paste',
+    'Find & Replace',
+    'Check Spelling',
+    'Revision Mode',
+    'Header & Footers',
+    'Script Settings'
+  ],
+  view: [
+    'Episode',
+    'Tools',
+    'Comments',
+    'Navigation',
+    'Script Goals',
+    'Script Timers',
+    'Script Insights',
+    'Scene Numbers',
+    'Dialogue Numbers',
+    'Zoom',
+    'Night Mode',
+    'Turotial Text',
+    'Element Assist',
+    'Color'
+  ],
+  Help: ['Tour', 'Help Center', 'Keyboard Shortcuts', 'Blog']
 }
 
 const ScriptWriter = () => {
