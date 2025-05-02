@@ -61,27 +61,39 @@ const ScriptWriter = () => {
   const [userPrompt, setUserPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null)
+  const [content, setContent] = useState('')
 
   interface SelectedRange {
-    startContainer: Node
+    startContainer: Node | null
     startOffset: number
-    endContainer: Node
+    endContainer: Node | null
     endOffset: number
-    commonAncestor: HTMLElement
+    commonAncestor: HTMLElement | null
   }
 
-  const initRange = (): SelectedRange => ({
-    startContainer: document.createTextNode(''),
+  const [selectedRange, setSelectedRange] = useState<SelectedRange>({
+    startContainer: null,
     startOffset: 0,
-    endContainer: document.createTextNode(''),
+    endContainer: null,
     endOffset: 0,
-    commonAncestor: document.createElement('div')
+    commonAncestor: null
   })
-
-  const [selectedRange, setSelectedRange] = useState<SelectedRange>(initRange)
 
   const editorRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Initialize range when component mounts
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSelectedRange({
+        startContainer: document.createTextNode(''),
+        startOffset: 0,
+        endContainer: document.createTextNode(''),
+        endOffset: 0,
+        commonAncestor: document.createElement('div')
+      })
+    }
+  }, [])
 
   // Handle menu opening/closing
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, menuId: string) => {
@@ -97,13 +109,45 @@ const ScriptWriter = () => {
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 10, 50))
   const handleZoomReset = () => setZoom(100)
 
-  // Handle undo/redo
+  // Handle content changes
   const handleContentChange = () => {
     if (!editorRef.current) return
-    const content = editorRef.current.innerHTML
+    const newContent = editorRef.current.innerHTML
 
-    setUndoStack(prev => [...prev, content])
-    setRedoStack([])
+    // Only update if content actually changed
+    if (newContent !== content) {
+      setUndoStack(prev => [...prev, content])
+      setRedoStack([]) // Clear redo stack when new changes are made
+      setContent(newContent)
+    }
+  }
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return
+
+    const previousContent = undoStack[undoStack.length - 1]
+    const currentContent = content
+
+    if (editorRef.current) {
+      setRedoStack(prev => [...prev, currentContent])
+      setContent(previousContent)
+      editorRef.current.innerHTML = previousContent
+      setUndoStack(prev => prev.slice(0, -1))
+    }
+  }
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return
+
+    const nextContent = redoStack[redoStack.length - 1]
+    const currentContent = content
+
+    if (editorRef.current) {
+      setUndoStack(prev => [...prev, currentContent])
+      setContent(nextContent)
+      editorRef.current.innerHTML = nextContent
+      setRedoStack(prev => prev.slice(0, -1))
+    }
   }
 
   useEffect(() => {
@@ -174,8 +218,10 @@ const ScriptWriter = () => {
           break
         case 'shot':
           handleScriptElement('action')
+          break
         case 'text':
           handleScriptElement('text')
+          break
         default:
           break
       }
@@ -309,33 +355,7 @@ const ScriptWriter = () => {
     handleContentChange()
   }
 
-  const handleUndo = () => {
-    if (undoStack.length === 0) return
-    const content = undoStack[undoStack.length - 1]
-    const editor = editorRef.current
-
-    if (editor) {
-      setRedoStack(prev => [...prev, editor.textContent || ''])
-      editor.textContent = content
-    }
-
-    setUndoStack(prev => prev.slice(0, -1))
-  }
-
-  const handleRedo = () => {
-    if (redoStack.length === 0) return
-    const content = redoStack[redoStack.length - 1]
-    const editor = editorRef.current
-
-    if (editor) {
-      setUndoStack(prev => [...prev, editor.textContent || ''])
-      editor.textContent = content
-    }
-
-    setRedoStack(prev => prev.slice(0, -1))
-  }
-
-  // Handle keyboard shortcuts
+  // Update keyboard shortcuts handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -374,9 +394,8 @@ const ScriptWriter = () => {
     }
 
     document.addEventListener('keydown', handleKeyDown)
-
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [content, undoStack, redoStack]) // Add dependencies
 
   // Handle save and print
   const handleSave = () => {
@@ -500,36 +519,46 @@ const ScriptWriter = () => {
       // Restore the selection range
       const range = document.createRange()
 
-      range.setStart(selectedRange.startContainer, selectedRange.startOffset)
-      range.setEnd(selectedRange.endContainer, selectedRange.endOffset)
+      if (selectedRange.startContainer && selectedRange.endContainer) {
+        range.setStart(selectedRange.startContainer, selectedRange.startOffset)
+        range.setEnd(selectedRange.endContainer, selectedRange.endOffset)
 
-      // Delete the original content
-      range.deleteContents()
+        // Delete the original content
+        range.deleteContents()
 
-      // Insert the new content
-      range.insertNode(document.createTextNode(upgradedText))
+        // Insert the new content
+        range.insertNode(document.createTextNode(upgradedText))
 
-      // Update the selection to the new content
-      const selection = window.getSelection()
+        // Update the selection to the new content
+        const selection = window.getSelection()
 
-      if (selection) {
-        selection.removeAllRanges()
+        if (selection && selectedRange.commonAncestor) {
+          selection.removeAllRanges()
 
-        // Create a new range at the end of the inserted text
-        const newRange = document.createRange()
+          // Create a new range at the end of the inserted text
+          const newRange = document.createRange()
 
-        newRange.selectNodeContents(selectedRange.commonAncestor)
-        newRange.collapse(false)
-        selection.addRange(newRange)
+          newRange.selectNodeContents(selectedRange.commonAncestor)
+          newRange.collapse(false)
+          selection.addRange(newRange)
+        }
+
+        // Focus back on the element
+        if (selectedRange.commonAncestor) {
+          selectedRange.commonAncestor.focus()
+        }
       }
-
-      // Focus back on the element
-      selectedRange.commonAncestor.focus()
 
       setShowAIModal(false)
       setUserPrompt('')
       setSelectedElement(null)
-      setSelectedRange(initRange)
+      setSelectedRange({
+        startContainer: null,
+        startOffset: 0,
+        endContainer: null,
+        endOffset: 0,
+        commonAncestor: null
+      })
       setSnackbarMessage('Text enhanced successfully')
       setShowSnackbar(true)
       handleContentChange() // Update undo stack
@@ -1051,6 +1080,7 @@ const ScriptWriter = () => {
               color: '#000000'
             }}
             onInput={handleContentChange}
+            onBlur={handleContentChange}
           />
         </Box>
       </Box>
