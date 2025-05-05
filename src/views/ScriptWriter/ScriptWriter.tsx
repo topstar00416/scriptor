@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef } from 'react'
 
 import OpenAI from 'openai'
+import { createClient } from '@supabase/supabase-js'
+import swal from 'sweetalert'
+
+// Initialize Supabase client
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 // MUI Imports
 import {
@@ -80,7 +85,7 @@ const menuItems = {
   Help: ['Tour', 'Help Center', 'Keyboard Shortcuts', 'Blog']
 }
 
-const ScriptWriter = () => {
+const ScriptWriter = ({ projectId }: { projectId: string }) => {
   const [anchorEls, setAnchorEls] = useState<{ [key: string]: null | HTMLElement }>({})
   const [fontSize, setFontSize] = useState('12')
   const [fontFamily, setFontFamily] = useState('Arial')
@@ -291,18 +296,36 @@ const ScriptWriter = () => {
       range.collapse(false)
     }
 
-    // Check if the previous element is empty and remove it
-    const previousElement = range.startContainer.parentElement
+    // Get the current element and its content
+    const currentElement = range.startContainer.parentElement
+    const hasContent = currentElement?.textContent?.trim() !== ''
 
+    // If current element has content and is a script element, create new element after it
     if (
-      previousElement &&
-      previousElement.lastChild &&
-      'className' in previousElement.lastChild &&
-      typeof (previousElement.lastChild as HTMLElement).className === 'string' &&
-      (previousElement.lastChild as HTMLElement).className.includes('script-format-') &&
-      !(previousElement.lastChild as HTMLElement).textContent?.trim()
+      hasContent &&
+      currentElement &&
+      'className' in currentElement &&
+      typeof (currentElement as HTMLElement).className === 'string' &&
+      (currentElement as HTMLElement).className.includes('script-format-')
     ) {
-      previousElement.lastChild.remove()
+      // Create a new range after the current element
+      const previousElement = range.startContainer.parentElement?.parentElement
+
+      previousElement?.lastChild?.remove()
+    } else {
+      // Original behavior: check if the previous element is empty and remove it
+      const previousElement = range.startContainer.parentElement
+
+      if (
+        previousElement &&
+        previousElement.lastChild &&
+        'className' in previousElement.lastChild &&
+        typeof (previousElement.lastChild as HTMLElement).className === 'string' &&
+        (previousElement.lastChild as HTMLElement).className.includes('script-format-') &&
+        !(previousElement.lastChild as HTMLElement).textContent?.trim()
+      ) {
+        previousElement.lastChild.remove()
+      }
     }
 
     // Create element container
@@ -436,10 +459,60 @@ const ScriptWriter = () => {
   }, [content, undoStack, redoStack]) // Add dependencies
 
   // Handle save and print
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    setSnackbarMessage('Document saved')
-    setShowSnackbar(true)
+  const handleSave = async () => {
+    try {
+      if (!editorRef.current) return
+
+      const willSave = await swal({
+        title: 'Save Script?',
+        text: 'Are you sure you want to save this script?',
+        icon: 'info',
+        buttons: ['Cancel', 'Yes, save it!']
+      })
+
+      if (!willSave) return
+
+      swal({
+        title: 'Saving script...',
+        text: 'Please wait...',
+        icon: 'info',
+        closeOnClickOutside: false
+      })
+
+      const scriptData = {
+        content: editorRef.current.innerHTML,
+        title:
+          editorRef.current.querySelector('[data-placeholder="Enter Script Title Here"]')?.textContent ||
+          'Untitled Script',
+        author:
+          editorRef.current.querySelector('[data-placeholder="Written by: [Author Name]"]')?.textContent ||
+          'Unknown Author',
+        updated_at: new Date().toISOString()
+      }
+
+      // Update project's script content and timestamp
+      const { error: projectError } = await supabase
+        .from('Project')
+        .update({
+          script: scriptData.content
+        })
+        .eq('id', projectId)
+
+      if (projectError) throw projectError
+
+      await swal({
+        title: 'Success!',
+        text: 'Script saved successfully',
+        icon: 'success'
+      })
+    } catch (error) {
+      console.error('Error saving script:', error)
+      await swal({
+        title: 'Error!',
+        text: 'Failed to save script',
+        icon: 'error'
+      })
+    }
   }
 
   const handlePrint = () => {
@@ -909,6 +982,18 @@ const ScriptWriter = () => {
               onClick={handleAIEnhance}
             >
               AI Enhance
+            </Button>
+          </Tooltip>
+          <Divider orientation='vertical' flexItem />
+          <Tooltip title='Save (Ctrl+S)'>
+            <Button
+              variant='contained'
+              size='small'
+              color='success'
+              startIcon={<i className='bx bx-save'></i>}
+              onClick={handleSave}
+            >
+              Save
             </Button>
           </Tooltip>
         </Toolbar>
